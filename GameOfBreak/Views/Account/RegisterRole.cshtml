@@ -1,0 +1,32 @@
+﻿@model GameOfBreak.Models.RoleViewModel
+@{
+    var nombre = String.IsNullOrEmpty(Model.Id) ? "Nuevo rol" : Model.Name;
+    ViewBag.Title = nombre;
+}
+
+<h2>@nombre</h2>
+
+
+@using (Html.BeginForm("RegisterRole", "Account")) {
+
+    @Html.AntiForgeryToken()
+
+    if (String.IsNullOrEmpty(Model.Id)) {
+        @Html.Hidden("Id", "none")
+    } else {
+        @Html.HiddenFor(m => m.Id)
+    }
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Name, new { @class = "control-label" })
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Name)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

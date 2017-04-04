@@ -1,0 +1,35 @@
+﻿@model GameOfBreak.Models.GoB.MunicipioDelegacion
+
+@{
+
+    var nombreMunicipioDelegacion = Model.ID_MUNICIPIO_DELEGACION <= 0 
+        ? "Nuevo Municipio Delegacion" 
+        : Model.MunicipioDelegacion1;
+
+    ViewBag.Title = "MunicipioDelegacionForm";
+
+}
+
+<h2>@nombreMunicipioDelegacion</h2>
+
+@using (Html.BeginForm("GuardarMunicipioDelegacion", "Directorio")) {
+
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(mun => mun.ID_MUNICIPIO_DELEGACION)
+
+    <div class="form-group">
+        @Html.LabelFor(mun => mun.MunicipioDelegacion1)
+        @Html.TextBoxFor(mun => mun.MunicipioDelegacion1, new { @class = "form-control" })
+        @Html.ValidationMessageFor(mun => mun.MunicipioDelegacion1)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval");
+
+}

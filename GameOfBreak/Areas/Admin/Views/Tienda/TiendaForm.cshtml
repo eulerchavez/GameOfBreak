@@ -1,0 +1,60 @@
+﻿@model GameOfBreak.Areas.Admin.Models.TiendaViewModel
+@{
+    var nombre = Model.Tienda.ID_TIENDA <= 0 ? "Nueva tienda" : Model.Tienda.Nombre;
+    ViewBag.Title = nombre;
+    var cp = Model.CPs;
+}
+
+<h2>@nombre</h2>
+
+@using (Html.BeginForm("GuardarTienda", "Tienda")) {
+
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(t => t.Tienda.ID_TIENDA)
+
+    <div class="form-group">
+        @Html.LabelFor(t => t.Tienda.NumeroTienda)
+        @Html.TextBoxFor(t => t.Tienda.NumeroTienda, new { @class = "form-control" })
+        @Html.ValidationMessageFor(t => t.Tienda.NumeroTienda)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(t => t.Tienda.Nombre)
+        @Html.TextBoxFor(t => t.Tienda.Nombre, new { @class = "form-control" })
+        @Html.ValidationMessageFor(t => t.Tienda.Nombre)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(t => t.Tienda.Calle)
+        @Html.TextBoxFor(t => t.Tienda.Calle, new { @class = "form-control" })
+        @Html.ValidationMessageFor(t => t.Tienda.Calle)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(t => t.Tienda.NumInt)
+        @Html.TextBoxFor(t => t.Tienda.NumInt, new { @class = "form-control" })
+        @Html.ValidationMessageFor(t => t.Tienda.NumInt)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(t => t.Tienda.NumExt)
+        @Html.TextBoxFor(t => t.Tienda.NumExt, new { @class = "form-control" })
+        @Html.ValidationMessageFor(t => t.Tienda.NumExt)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(t => t.Tienda.ID_CP)
+        @Html.DropDownListFor(t => t.Tienda.ID_CP, new SelectList(cp, "ID_CP", "CP"), "Selecciona el Codigo Postal", new { @class = "form-control" })
+        @Html.ValidationMessageFor(t => t.Tienda.ID_CP)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+}

@@ -1,0 +1,68 @@
+﻿@model GameOfBreak.Areas.Admin.Models.DirectorioViewModel
+@{
+    ViewBag.Title = "";
+
+    var codigoPostal = Model.CodigoPostal;
+
+    var colonias = Model.Colonias;
+    var municipios = Model.MunicipiosDelegaciones;
+    var estados = Model.Estados;
+    var ciudades = Model.Ciudades;
+
+}
+
+@if (codigoPostal.ID_CP != 0) {
+
+    <h1>Edición del registro</h1>
+
+} else {
+
+    <h1>Creación de un nuevo registro</h1>
+
+}
+
+@using (Html.BeginForm("Guardar", "Directorio")) {
+
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(cp => cp.CodigoPostal.ID_CP)
+
+    <div class="form-group">
+        @Html.LabelFor(cp => cp.CodigoPostal.CP)
+        @Html.TextBoxFor(cp => cp.CodigoPostal.CP, new { @class = "form-control" })
+        @Html.ValidationMessageFor(cp => cp.CodigoPostal.CP)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(col => col.CodigoPostal.Colonia)
+        @Html.DropDownListFor(col => col.CodigoPostal.ID_COLONIA, new SelectList(colonias, "ID_COLONIA", "Colonia1"), "Seleccione la colonia", new { @class = "form-control" })
+        @Html.ValidationMessageFor(col => col.CodigoPostal.ID_COLONIA)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(mun => mun.CodigoPostal.MunicipioDelegacion)
+        @Html.DropDownListFor(mun => mun.CodigoPostal.ID_MUNICIPIO_DELEGACION, new SelectList(municipios, "ID_MUNICIPIO_DELEGACION", "MunicipioDelegacion1"), "Seleccione el Municipio o Delegación", new { @class = "form-control" })
+        @Html.ValidationMessageFor(mun => mun.CodigoPostal.ID_MUNICIPIO_DELEGACION)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(edo => edo.CodigoPostal.Estado)
+        @Html.DropDownListFor(edo => edo.CodigoPostal.ID_ESTADO, new SelectList(estados, "ID_ESTADO", "Estado1"), "Seleccione el Estado", new { @class = "form-control" })
+        @Html.ValidationMessageFor(edo => edo.CodigoPostal.ID_ESTADO)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(ciu => ciu.CodigoPostal.Ciudad)
+        @Html.DropDownListFor(ciu => ciu.CodigoPostal.ID_CIUDAD, new SelectList(ciudades, "ID_CIUDAD", "Ciudad1"), "Seleccione la Ciudad", new { @class = "form-control" })
+        @Html.ValidationMessageFor(ciu => ciu.CodigoPostal.ID_CIUDAD)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+}

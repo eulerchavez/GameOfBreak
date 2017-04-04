@@ -1,0 +1,198 @@
+﻿@model GameOfBreak.Models.RegisterViewModel
+@{
+    ViewBag.Title = "Registrarse";
+    var estaAutenticado = User.Identity.IsAuthenticated;
+    var esAdministrador = User.IsInRole("Administrador");
+    var esGerencia = User.IsInRole("Gerente") || User.IsInRole("Subgerente");
+    var esVendedor = User.IsInRole("Vendedor");
+
+    var listadoRol = new List<GameOfBreak.Models.GoB.AspNetRoles>();
+
+    if (esAdministrador) {
+
+        listadoRol.Add(new GameOfBreak.Models.GoB.AspNetRoles() { Name = "Gerente" });
+        listadoRol.Add(new GameOfBreak.Models.GoB.AspNetRoles() { Name = "Subgerente" });
+        listadoRol.Add(new GameOfBreak.Models.GoB.AspNetRoles() { Name = "Vendedor" });
+        listadoRol.Add(new GameOfBreak.Models.GoB.AspNetRoles() { Name = "Cliente" });
+
+    } else if (esGerencia) {
+
+        listadoRol.Add(new GameOfBreak.Models.GoB.AspNetRoles() { Name = "Subgerente" });
+        listadoRol.Add(new GameOfBreak.Models.GoB.AspNetRoles() { Name = "Vendedor" });
+        listadoRol.Add(new GameOfBreak.Models.GoB.AspNetRoles() { Name = "Cliente" });
+
+    } else if (esVendedor) {
+        listadoRol.Add(new GameOfBreak.Models.GoB.AspNetRoles() { Name = "Cliente" });
+    }
+
+}
+
+<h2>@ViewBag.Title.</h2>
+
+@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" })) {
+
+    @Html.AntiForgeryToken()
+
+    <h4>Cree una cuenta nueva.</h4>
+
+    <hr />
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Datos personales</div>
+        <div class="panel-body">
+            <div class="form-group">
+                @Html.LabelFor(m => m.PrimerNombre, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.PrimerNombre, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.PrimerNombre, null, new { @class = "text-danger" })
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.SegundoNombre, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.SegundoNombre, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.SegundoNombre, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.ApellidoPaterno, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.ApellidoPaterno, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.ApellidoPaterno, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.ApellidoMaterno, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.ApellidoMaterno, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.ApellidoMaterno, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.FechaNacimiento, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.FechaNacimiento, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.FechaNacimiento, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.TelefonoCasa, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.TelefonoCasa, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.TelefonoCasa, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Domicilio</div>
+        <div class="panel-body">
+            <div class="form-group">
+                @Html.LabelFor(m => m.Calle, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.Calle, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Calle, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.NumInt, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.NumInt, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.NumInt, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.NumExt, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.NumExt, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.NumExt, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.CP, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.CP, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.CP, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Usuario</div>
+        <div class="panel-body">
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.UserName, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.UserName, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.UserName, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Email, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Password, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.ConfirmPassword, null, new { @class = "text-danger" })
+                </div>
+            </div>
+
+            @* Tipo de usuario
+               Si no esta autenticado y no es gerencia, se registrará un Cliente*@
+
+            @if (!estaAutenticado && !esGerencia) {
+                @Html.Hidden("Role", "Cliente")
+
+            } else {
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Role, new { @class = "col-md-2 control-label" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(m => m.Role, new SelectList(listadoRol, "Name", "Name"), "Selecciona el tipo de usuario", new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.Role, null, new { @class = "text-danger" })
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" class="btn btn-default pull-right" value="Registrarse" />
+        </div>
+    </div>
+
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

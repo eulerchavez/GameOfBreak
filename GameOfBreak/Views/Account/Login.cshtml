@@ -1,0 +1,75 @@
+﻿@model GameOfBreak.Models.LoginViewModel
+@{
+    ViewBag.Title = "Administración";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="row vertical-offset-100">
+            <div class="col-md-4 col-md-offset-4">
+
+                <div class="panel panel-default">
+
+                    <div class="panel-heading">
+                        Game Of Break - Inicia Sesión
+                    </div>
+
+                    <div class="panel-body">
+                        @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl } , FormMethod.Post, new { @class = "", role = "form"})) {
+
+                            @Html.AntiForgeryToken()
+
+                            @Html.ValidationSummary()
+
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
+                                    @Html.TextBoxFor(m => m.Usuario, new { @class = "form-control", placeholder = "Usuario" })
+                                </div>
+                                @Html.ValidationMessageFor(m => m.Usuario, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
+                                    @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Contraseña" })
+                                </div>
+                                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-default">
+                                    <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Iniciar Sesión
+                                </button>
+                            </div>
+
+                        }
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - Game Of Break</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/jqueryval")
+</body>
+</html>

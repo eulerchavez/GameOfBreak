@@ -1,0 +1,75 @@
+﻿@model GameOfBreak.Models.PaginationViewModel<GameOfBreak.Areas.Admin.Models.TiendaViewModel>
+@{
+    ViewBag.Title = "Tiendas";
+    var tiendas = Model.Items;
+    var pager = Model.Pager;
+}
+
+<h2>Tiendas</h2>
+
+@Html.ActionLink("Nueva tienda", "AgregarTienda", "Tienda", null, new { @class = "btn btn-default" })
+
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th>Numero de tienda</th>
+            <th>Nombre</th>
+            <th>Calle</th>
+            <th>Num. Int</th>
+            <th>Num. Ext</th>
+            <th>Codigo Postal</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var tienda in tiendas) {
+            <tr>
+                <td>@tienda.Tienda.NumeroTienda</td>
+                <td>@tienda.Tienda.Nombre</td>
+                <td>@(tienda.Tienda.NumeroTienda != 1 ? tienda.Tienda.Calle : "-")</td>
+                <td>@(tienda.Tienda.NumeroTienda != 1 ? tienda.Tienda.NumInt : "-")</td>
+                <td>@(tienda.Tienda.NumeroTienda != 1 ? tienda.Tienda.NumExt : "-") </td>
+                <td>@(tienda.Tienda.NumeroTienda != 1 ? tienda.CP.CP : "-")</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Accion
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                            @if (tienda.Tienda.NumeroTienda != 1) {
+                                <li> @Html.ActionLink("Editar", "EditarTienda", "Tienda", new { idTienda = tienda.Tienda.ID_TIENDA }, null)</li>
+                                <li>@Html.ActionLink("Ver empleados", "Empleados", "Usuario", new { idTienda = tienda.Tienda.ID_TIENDA }, null)</li>
+                            }
+                            @*<li>@Html.ActionLink("Eliminar", "", "")</li>*@
+                            <li>@Html.ActionLink("Ver ventas", "VerVentas", "Venta", new { idTienda = tienda.Tienda.ID_TIENDA }, null)</li>
+                            <li>@Html.ActionLink("Ver almacen", "VerAlmacen", "Almacen", new { idTienda = tienda.Tienda.ID_TIENDA }, null)</li>
+                        </ul>
+                    </div>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="row">
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+
+            @for (int i = pager.StartPage; i <= pager.EndPage; i++) {
+                <li class="@(i == pager.CurrentPage ? " active": ")" )">@Html.ActionLink(i.ToString(), "Tiendas", "Tienda", new { page = i, count = pager.TotalItems }, null)</li>
+            }
+
+        </ul>
+    </nav>
+
+    <div>
+        Total de registros obtenidos:
+        <div class="badge">
+            @pager.TotalItems
+        </div>
+    </div>
+
+</div>

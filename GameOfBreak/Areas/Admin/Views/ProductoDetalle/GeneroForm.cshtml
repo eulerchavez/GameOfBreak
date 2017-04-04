@@ -1,0 +1,31 @@
+﻿@model GameOfBreak.Models.GoB.Genero
+
+@{
+    var nombre = Model.ID_GENERO != 0 ? Model.Genero1 : "Nuevo genero";
+
+    ViewBag.Title = nombre;
+}
+
+<h2>@nombre</h2>
+
+@using (Html.BeginForm("GuardarGenero", "ProductoDetalle")) {
+
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(gen => gen.ID_GENERO)
+
+    <div class="form-group">
+        @Html.LabelFor(gen => gen.Genero1)
+        @Html.TextBoxFor(gen => gen.Genero1, new { @class = "form-control" })
+        @Html.ValidationMessageFor(gen => gen.Genero1)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+}

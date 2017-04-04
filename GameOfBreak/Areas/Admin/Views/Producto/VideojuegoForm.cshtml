@@ -1,0 +1,98 @@
+﻿@model GameOfBreak.Areas.Admin.Models.VideojuegoViewModel
+
+@{
+    ViewBag.Title = String.IsNullOrEmpty(Model.Videojuego.UPC) ? Model.Videojuego.Nombre : "Nuevo registro";
+    var desarrolladoras = Model.Desarrolladoras;
+    var clasificaciones = Model.Clasificaciones;
+    var generos = Model.Generos;
+    var plataformas = Model.Plataformas;
+
+    
+
+}
+
+<h2>@Model.Videojuego.Nombre</h2>
+
+@using (Html.BeginForm("GuardarVideojuego", "Producto")) {
+
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(vj => vj.UPC)
+
+    if (!String.IsNullOrEmpty(Model.Plataforma.Plataforma1)) {
+        @Html.HiddenFor(vj => vj.Plataforma.Plataforma1)
+    } else {
+        @Html.Hidden("Plataforma.Plataforma1", "none")
+    }
+
+     @Html.ValidationSummary()
+
+    <div class="form-group">
+        @Html.LabelFor(vj => vj.Videojuego.UPC)
+        @Html.TextBoxFor(vj => vj.Videojuego.UPC, new { @class = "form-control" })
+        @Html.ValidationMessageFor(vj => vj.Videojuego.UPC)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(vj => vj.Videojuego.Nombre)
+        @Html.TextBoxFor(vj => vj.Videojuego.Nombre, new { @class = "form-control" })
+        @Html.ValidationMessageFor(vj => vj.Videojuego.Nombre)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(vj => vj.Videojuego.Descripcion)
+        @Html.TextAreaFor(vj => vj.Videojuego.Descripcion, new { @class = "form-control", rows = "3" })
+        @Html.ValidationMessageFor(vj => vj.Videojuego.Descripcion)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(vj => vj.Plataforma.ID_PLATAFORMA)
+        @Html.DropDownListFor(vj => vj.Plataforma.ID_PLATAFORMA, new SelectList(plataformas, "ID_PLATAFORMA", "Plataforma1"), "Selecciona la consola", new { @class = "form-control" })
+        @Html.ValidationMessageFor(vj => vj.Plataforma.ID_PLATAFORMA)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(vj => vj.Videojuego.ID_DESARROLLADORA)
+        @Html.DropDownListFor(vj => vj.Videojuego.ID_DESARROLLADORA, new SelectList(desarrolladoras, "ID_DESARROLLADORA", "Desarrolladora1"), "Selecciona la desarrolladora", new { @class = "form-control" })
+        @Html.ValidationMessageFor(vj => vj.Videojuego.ID_DESARROLLADORA)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(vj => vj.Videojuego.ID_CLASIFICACION)
+        @Html.DropDownListFor(vj => vj.Videojuego.ID_CLASIFICACION, new SelectList(clasificaciones, "ID_CLASIFICACION", "Clasificacion1"), "Selecciona la clasificación", new { @class = "form-control" })
+        @Html.ValidationMessageFor(vj => vj.Videojuego.ID_CLASIFICACION)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(vj => vj.Videojuego.ID_GENERO)
+        @Html.DropDownListFor(vj => vj.Videojuego.ID_GENERO, new SelectList(generos, "ID_GENERO", "Genero1"), "Selecciona el género", new { @class = "form-control" })
+        @Html.ValidationMessageFor(vj => vj.Videojuego.ID_GENERO)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(vj => vj.Videojuego.NumeroJugadores)
+        @Html.TextBoxFor(vj => vj.Videojuego.NumeroJugadores, new { @class = "form-control" })
+        @Html.ValidationMessageFor(vj => vj.Videojuego.NumeroJugadores)
+    </div>
+
+    <div class="checkbox-inline">
+        @Html.CheckBoxFor(vj => vj.Videojuego.EnLinea)
+        @Html.LabelFor(vj => vj.Videojuego.EnLinea)
+        @Html.ValidationMessageFor(vj => vj.Videojuego.EnLinea)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(vj => vj.Videojuego.FechaSalida)
+        @Html.TextBoxFor(vj => vj.Videojuego.FechaSalida, "{0:yyyy-MM-dd}", new { @class = "form-control" })
+        @Html.ValidationMessageFor(vj => vj.Videojuego.FechaSalida)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+}

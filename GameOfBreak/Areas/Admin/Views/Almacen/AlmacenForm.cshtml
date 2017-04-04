@@ -1,0 +1,59 @@
+﻿@model GameOfBreak.Areas.Admin.Models.AlmacenFormViewModel
+@{
+    var nombre = String.IsNullOrEmpty(Model.UPC) ? "Nuevo registro al almacen" : Model.UPC;
+    ViewBag.Title = nombre;
+    var estatus = Model.Estatus;
+    var descuentos = Model.Descuentos;
+
+}
+
+<h2>@nombre</h2>
+
+@using (Html.BeginForm("GuardarRegistroAlmacen", "Almacen")) {
+
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(al => al.UPC)
+
+    @Html.HiddenFor(al => al.Almacen.ID_ALMACEN)
+    @Html.HiddenFor(al => al.Almacen.ID_TIENDA)
+
+    <div class="form-group">
+        @Html.LabelFor(al => al.Almacen.UPC)
+        @Html.TextBoxFor(al => al.Almacen.UPC, new { @class = "form-control" })
+        @Html.ValidationMessageFor(al => al.Almacen.UPC)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(t => t.Almacen.ID_ESTATUS)
+        @Html.DropDownListFor(t => t.Almacen.ID_ESTATUS, new SelectList(estatus, "ID_ESTATUS", "Estatus1"), "Selecciona el estatus", new { @class = "form-control" })
+        @Html.ValidationMessageFor(t => t.Almacen.ID_ESTATUS)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(t => t.Almacen.ID_DESCUENTO)
+        @Html.DropDownListFor(t => t.Almacen.ID_DESCUENTO, new SelectList(descuentos, "ID_DESCUENTO", "Descuento1"), "Selecciona el descuento", new { @class = "form-control" })
+        @Html.ValidationMessageFor(t => t.Almacen.ID_DESCUENTO)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(al => al.Almacen.Cantidad)
+        @Html.TextBoxFor(al => al.Almacen.Cantidad, new { @class = "form-control" })
+        @Html.ValidationMessageFor(al => al.Almacen.Cantidad)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(al => al.Almacen.Precio)
+        @Html.TextBoxFor(al => al.Almacen.Precio, new { @class = "form-control" })
+        @Html.ValidationMessageFor(al => al.Almacen.Precio)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+}

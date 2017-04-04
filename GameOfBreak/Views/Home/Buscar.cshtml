@@ -1,0 +1,16 @@
+﻿@model IEnumerable<GameOfBreak.Models.GoB.Productos>
+@{
+    ViewBag.Title = "Resultados de la busqueda";
+}
+
+<h2>@(Model.Count() <= 0 ? "Sin resultados en la busqueda." : "Resultados de la busqueda")</h2>
+
+<div class="list-group">
+    @foreach (var item in Model) {
+        if (item.Desarrolladora.Equals("NO APLICA")) {
+            @Html.ActionLink(item.Plataforma + " - " + item.Titulo, "VerDetalleAccesorio", "VentaProducto", new { upc = item.UPC }, new { @class = "list-group-item" });
+        } else {
+            @Html.ActionLink(item.Plataforma + " - " + item.Titulo, "VerDetalleVideojuego", "VentaProducto", new { upc = item.UPC }, new { @class = "list-group-item" });
+        }
+    }
+</div>

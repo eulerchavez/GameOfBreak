@@ -1,0 +1,54 @@
+﻿@model GameOfBreak.Models.CarritoViewModel
+@{
+    ViewBag.Title = "Carrito";
+
+    var idCarrito = Model.idCarrito;
+
+    var detalleCar = Model.DetalleCarrito;
+
+}
+
+<h2>Carrito de compras</h2>
+
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th>UPC</th>
+            <th>Titulo</th>
+            <th>Platadorma</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Total</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in detalleCar) {
+            <tr>
+                <td>@item.UPC</td>
+                <td>@item.Titulo</td>
+                <td>@item.Plataforma</td>
+                <td>@item.Cantidad</td>
+                <td>@item.Precio</td>
+                <td>@item.Total</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Accion
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                            <li>@Html.ActionLink("Quitar uno", "RemoverDelCarrito", "ShoppingCart", new { upc = item.UPC }, null)</li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="row">
+
+    @Html.ActionLink("Confirmar compra", "ConfirmarCompra", "ShoppingCart", null, new { @class = "btn btn-default pull-right" })
+
+</div>

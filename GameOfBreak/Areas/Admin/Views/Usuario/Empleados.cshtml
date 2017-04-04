@@ -1,0 +1,79 @@
+﻿@model GameOfBreak.Models.PaginationViewModel <GameOfBreak.Areas.Admin.Models.EmpleadoViewModel>
+@{
+    ViewBag.Title = "Empleados";
+    var listado = Model.Items;
+    var pager = Model.Pager;
+    var idTienda = ViewBag.IdTienda;
+}
+
+<h2>Empleados</h2>
+
+@Html.ActionLink("Nuevo empleado", "Register", "Account", new { area = "" }, new { @class = "btn  btn-default" })
+
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Teléfono local</th>
+            <th>Teléfono mobil</th>
+            <th>Némero de Tienda</th>
+            <th>Tienda</th>
+            <th>Role</th>
+            @if (!User.IsInRole("Administrador")) {
+                <th>Acciones</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in listado) {
+            <tr>
+                <td>@item.Usuario.UserName</td>
+                <td>@(item.Usuario.PrimerNombre + " " + item.Usuario.ApellidoPaterno)</td>
+                <td>@item.Usuario.Email</td>
+                <td>@item.Usuario.TelefonoCasa</td>
+                <td>@item.Usuario.PhoneNumber</td>
+                <td>@(item?.Tienda?.NumeroTienda)</td>
+                <td>@(item?.Tienda?.Nombre)</td>
+                <td>@item.Role.Name</td>
+                @if (!User.IsInRole("Administrador")) {
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Accion
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                <li>@Html.ActionLink("Editar datos", "EditarDatos", "Usuario", new { idUsuario = item.Usuario.Id }, null)</li>
+                            </ul>
+                        </div>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+
+<div class="row">
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+
+            @for (int i = pager.StartPage; i <= pager.EndPage; i++) {
+                <li class="@(i == pager.CurrentPage ? " active": ")" )">@Html.ActionLink(i.ToString(), "Empleados", "Usuario", new { page = i, count = pager.TotalItems, idTienda = idTienda }, null)</li>
+            }
+
+        </ul>
+    </nav>
+
+    <div>
+        Total de registros obtenidos:
+        <div class="badge">
+            @pager.TotalItems
+        </div>
+    </div>
+
+</div>

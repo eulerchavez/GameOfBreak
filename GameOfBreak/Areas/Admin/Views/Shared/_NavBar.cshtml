@@ -1,0 +1,142 @@
+﻿@using Microsoft.AspNet.Identity
+
+@* Algo importante de resaltar, es que dependiendo el Rol que se maneje, serán los privilegios de opciones *@
+
+@{
+    var esAdministrador = User.IsInRole("Administrador");
+    var esGerencia = User.IsInRole("Gerente") || User.IsInRole("Subgerente");
+    var esVendedor = User.IsInRole("Vendedor");
+}
+
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            @Html.ActionLink("Game Of Break", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+        </div>
+
+        <div class="navbar-collapse collapse">
+
+            <ul class="nav navbar-nav">
+
+                @if (esAdministrador) {
+
+                    <li>@Html.ActionLink("Tiendas", "Tiendas", "Tienda")</li>
+
+                }
+
+                @if (esGerencia || esVendedor) {
+                    <li>@Html.ActionLink("Almacen", "VerAlmacen", "Almacen")</li>
+                }
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        Usuarios <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+
+                        @if (esAdministrador || esGerencia) {
+                            <li>@Html.ActionLink("Empleados", "Empleados", "Usuario")</li>
+                        }
+
+                        <li>@Html.ActionLink("Clientes", "Clientes", "Usuario")</li>
+
+                        @if (esAdministrador) {
+
+                            <li class="divider"></li>
+
+                                <li>@Html.ActionLink("Roles", "VerRoles", "Usuario")</li>
+
+                        }
+
+                    </ul>
+                </li>
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        Productos y detalles <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+
+                        <li>@Html.ActionLink("VideoJuegos", "Videojuegos", "Producto")</li>
+                        <li>@Html.ActionLink("Accesorios", "Accesorios", "Producto")</li>
+
+                        @if (esAdministrador) {
+
+                            <li class="divider"></li>
+
+                                <li>@Html.ActionLink("Desarrolladoras", "Desarrolladoras", "ProductoDetalle")</li>
+                                <li>@Html.ActionLink("Plataformas", "Plataformas", "ProductoDetalle")</li>
+                                <li>@Html.ActionLink("Clasificaciones", "Clasificaciones", "ProductoDetalle")</li>
+                                <li>@Html.ActionLink("Generos", "Generos", "ProductoDetalle")</li>
+                        }
+
+                    </ul>
+                </li>
+
+                @if (esAdministrador) {
+
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            Directorio <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+
+                            <li>@Html.ActionLink("Codigos Postales", "Index", "Directorio")</li>
+
+                            @if (esAdministrador || esGerencia) {
+                                <li class="divider"></li>
+                                    <li>@Html.ActionLink("Colonia", "Colonias", "Directorio")</li>
+                                    <li>@Html.ActionLink("Municipio o Delegación", "MunicipiosDelegaciones", "Directorio")</li>
+                                    <li>@Html.ActionLink("Estado", "Estados", "Directorio")</li>
+                                    <li>@Html.ActionLink("Ciudad", "Ciudades", "Directorio")</li>
+                            }
+
+                        </ul>
+                    </li>
+
+                }
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        Ventas <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+
+                        @*@if (!esAdministrador) {
+                                <li>@Html.ActionLink("Realizar nueva venta", "NuevaVenta", "Venta")</li>
+                                <li class="divider"></li>
+                            }*@
+                        @if (esAdministrador) {
+                            <li>@Html.ActionLink("Ver ventas", "Tiendas", "Tienda")</li>
+                        } else {
+                            <li>@Html.ActionLink("Ver ventas", "VerVentas", "Venta", new { idTienda = 0 }, null)</li>
+                        }
+                    </ul>
+                </li>
+
+                <li>@Html.ActionLink("Reportes", "Index", "Reportes")</li>
+
+
+            </ul>
+
+            @using (Html.BeginForm("LogOff", "Account", new { area = "" }, FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" })) {
+
+                @Html.AntiForgeryToken()
+
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        @Html.ActionLink("Bienvenido " + User.Identity.GetUserName() + "!", "EditarDatos", "Usuario", routeValues: new { area = "Admin", idUsuario = User.Identity.GetUserId() }, htmlAttributes: new { title = "Manage" })
+                    </li>
+                    <li><a href="javascript:document.getElementById('logoutForm').submit()">Cerrar sesión</a></li>
+                </ul>
+            }
+
+        </div>
+    </div>
+</div>

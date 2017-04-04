@@ -1,0 +1,32 @@
+﻿@model GameOfBreak.Models.GoB.Colonia
+
+@{
+    var nombreColonia = Model.Colonia1 != null ? Model.Colonia1 : "Nueva Colonia";
+
+    ViewBag.Title = nombreColonia;
+}
+
+<h2>@nombreColonia</h2>
+
+@using (Html.BeginForm("GuardarColonia", "Directorio")) {
+
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(col => col.ID_COLONIA)
+
+    <div class="form-group">
+        @Html.LabelFor(col => col.Colonia1)
+        @Html.TextBoxFor(col => col.Colonia1, new { @class = "form-control" })
+        @Html.ValidationMessageFor(col => col.ID_COLONIA)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval");
+
+}
+

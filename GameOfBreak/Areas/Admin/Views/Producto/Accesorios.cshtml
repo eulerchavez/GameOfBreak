@@ -1,0 +1,75 @@
+﻿@model GameOfBreak.Models.PaginationViewModel<GameOfBreak.Areas.Admin.Models.AccesorioViewModel>
+@{
+    ViewBag.Title = "Accesorios";
+
+    var accesorios = Model.Items;
+    var pager = Model.Pager;
+    var idTienda = ViewBag.idTienda;
+}
+
+<h2>Accesorios</h2>
+@if (User.IsInRole("Administrador")) {
+    @Html.ActionLink("Agregar accesorio", "AgregarAccesorio", "Producto", null, new { @class = "btn btn-default" })
+}
+
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th>UPC</th>
+            <th>Nombre</th>
+            <th>Plataforma</th>
+            <th>Fecha de salida</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var accesorio in accesorios) {
+            <tr>
+                <td>@accesorio.Accesorio.UPC</td>
+                <td>@accesorio.Accesorio.Nombre</td>
+                <td>@accesorio.Plataforma.Plataforma1</td>
+                <td>@(String.Format("{0: dd/MM/yyyy}", accesorio.Accesorio.FechaSalida))</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Accion
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                            @if (User.IsInRole("Administrador")) {
+                                <li>@Html.ActionLink("Editar", "EditarAccesorio", "Producto", new { upc = accesorio.Accesorio.UPC }, null)</li>
+                                <li>@Html.ActionLink("Agregar multimedia", "EditarMultimedia", "Producto", new { upc = accesorio.Accesorio.UPC }, null)</li>
+                            } else {
+                                <li>@Html.ActionLink("Agregar al almacen", "NuevoRegistroAlmacenDesdeProducto", "Almacen", new { idTienda = idTienda, upc = accesorio.Accesorio.UPC }, null)</li>
+                            }
+
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="row">
+
+    <div class="col-sm-6">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+
+                @for (int i = pager.StartPage; i <= pager.EndPage; i++) {
+                    <li class="@(i == pager.CurrentPage ? " active": ")" )">@Html.ActionLink(i.ToString(), "Accesorios", "Producto", new { page = i, count = pager.TotalItems }, null)</li>
+                }
+
+            </ul>
+        </nav>
+    </div>
+
+    <div class="col-sm-6">
+        Total de registros obtenidos:
+        <div class="badge">
+            @pager.TotalItems
+        </div>
+    </div>
+
+</div>

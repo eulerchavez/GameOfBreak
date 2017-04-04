@@ -1,0 +1,41 @@
+﻿@model GameOfBreak.Areas.Admin.Models.EditarMultimediaViewModel
+@{
+    ViewBag.Title = "Multimedia";
+
+    var tipoMultimedia = Model.TipoMultimedia;
+}
+
+<h2>Multimedia</h2>
+
+@using (Html.BeginForm("GuardarMultimedia", "Producto")) {
+
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(m => m.Repositorio.ID_REPOSITORIO_PRODUCTO)
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Repositorio.UPC, new { @class = "control-label" })
+        @Html.TextBoxFor(m => m.Repositorio.UPC, new { @class = "form-control", @readonly = "readonly" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Repositorio.Ruta, new { @class = "control-label" })
+        @Html.TextBoxFor(m => m.Repositorio.Ruta, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Repositorio.Ruta, null, new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Repositorio.ID_TIPO_MULTIMEDIA)
+        @Html.DropDownListFor(m => m.Repositorio.ID_TIPO_MULTIMEDIA, new SelectList(tipoMultimedia, "ID_TIPO_MULTIMEDIA", "Multimedia"), "Seleccione", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Repositorio.ID_TIPO_MULTIMEDIA, null, new { @class = "text-danger" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+}

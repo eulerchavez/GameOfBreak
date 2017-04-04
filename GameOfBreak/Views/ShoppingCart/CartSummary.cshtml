@@ -1,0 +1,9 @@
+﻿@*@Html.ActionLink("Carrito (" + ViewData["CartCount"] + ")",
+    "Index",
+    "ShoppingCart",
+    new { id = "cart-status" }, null)*@
+
+<a href="~/ShoppingCart/Index">
+    <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span>
+    <span class="badge">@ViewData["CartCount"]</span>
+</a>

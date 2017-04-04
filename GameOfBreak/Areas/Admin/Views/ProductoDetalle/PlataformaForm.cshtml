@@ -1,0 +1,31 @@
+﻿@model GameOfBreak.Models.GoB.Plataforma
+
+@{
+    var nombre = Model.ID_PLATAFORMA != 0 ? Model.Plataforma1 : "Nueva plataforma";
+
+    ViewBag.Title = nombre;
+}
+
+<h2>@nombre</h2>
+
+@using (Html.BeginForm("GuardarPlataforma", "ProductoDetalle")) {
+
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(des => des.ID_PLATAFORMA)
+
+    <div class="form-group">
+        @Html.LabelFor(des => des.Plataforma1)
+        @Html.TextBoxFor(des => des.Plataforma1, new { @class = "form-control" })
+        @Html.ValidationMessageFor(des => des.Plataforma1)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+}

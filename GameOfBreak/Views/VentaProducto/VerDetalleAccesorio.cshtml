@@ -1,0 +1,99 @@
+﻿@model GameOfBreak.Models.AccesorioDetalleViewModel
+@{
+
+    var accesorio = Model.Videojuego;
+    var estatus = Model.Estatus;
+    var precio = Model.Precio;
+    var consola = Model.Consola;
+    var active = true;
+    ViewBag.Title = accesorio.Nombre;
+
+}
+
+<h2>@accesorio.Nombre</h2>
+
+@* Breadcrumb *@
+<ol class="breadcrumb">
+    <li>@Html.ActionLink("Game Of Break", "Index", "Home")</li>
+    <li>@Html.ActionLink(consola.Plataforma1, "Videojuegos", "VentaProducto", new { idConsola = consola.ID_PLATAFORMA }, null)</li>
+    <li class="active">@accesorio.Nombre</li>
+</ol>
+
+@* Carousel *@
+<div class="panel panel-default">
+    <div class="panel-heading">Imagenes</div>
+    <div class="panel-body">
+        @if (Model.Repositorio.Where(rep => rep.ID_TIPO_MULTIMEDIA == 3).Count() > 0) {
+            <div id="imgcarousel" class="carousel" data-ride="carousel">
+                <div class="carousel-inner">
+                    <ol class="carousel-indicators">
+                        @for (int i = 0; i < Model.Repositorio.Where(rep => rep.ID_TIPO_MULTIMEDIA == 3).Count(); i++) {
+                            <li data-target="#imgcarousel" data-slide-to="@i.ToString()" class="@(active ? "active" : "")"></li>
+                        }
+                    </ol>
+
+                    @foreach (var image in Model.Repositorio.Where(rep => rep.ID_TIPO_MULTIMEDIA == 3)) {
+
+                        <div class="item @(active ? "active" : "")">
+                            <img src="@Url.Content(image.Ruta)" class="img-responsive center-block" width="560" height="560" />
+                        </div>
+
+                        <a class="left carousel-control" href="#imgcarousel" data-slide="prev">
+                            <span class="icon-prev"></span>
+                        </a>
+
+                        <a class="right carousel-control" href="#imgcarousel" data-slide="next">
+                            <span class="icon-next"></span>
+                        </a>
+
+                        {
+                            active = false;
+                        }
+
+
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@* Datos y detalles del videojuego *@
+<div class="panel panel-default">
+    <div class="panel-heading">Detalles</div>
+    <div class="panel-body">
+        <div class="thumbnail">
+            @*<img src="..." alt="...">*@
+            <div class="caption">
+                <h2>@accesorio.Nombre</h2>
+                <h6>@estatus.Estatus1</h6>
+                <h4>Precio: @String.Format("{0 :C}", precio)</h4>
+                <h5>Fecha de lanzamiento: @String.Format("{0: dd/MM/yyyy}", accesorio.FechaSalida)</h5>
+                <p>Descripcion: @accesorio.Descripcion</p>
+                @Html.ActionLink("Agregar al carrito", "AgregarAlCarrito", "ShoppingCart", new { upc = accesorio.UPC }, new { @class = "btn btn-default" })
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Estadisticas de evaluacion *@
+<div class="panel panel-default">
+    <div class="panel-heading">Estadisticas</div>
+    <div class="panel-body">
+    </div>
+</div>
+
+
+@* Video *@
+<div class="panel panel-default">
+    <div class="panel-heading">Video</div>
+    <div class="panel-body">
+        <div class="bs-example" data-example-id="responsive-embed-16by9-iframe-youtube">
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe width="560" height="315" src="@(Model.Repositorio.Where(rep => rep.ID_TIPO_MULTIMEDIA == 4).LastOrDefault() != null ? Model.Repositorio.Where(rep => rep.ID_TIPO_MULTIMEDIA == 4).LastOrDefault().Ruta : "")" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+

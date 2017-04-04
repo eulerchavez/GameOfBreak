@@ -1,0 +1,62 @@
+﻿@model IEnumerable<GameOfBreak.Areas.Admin.Models.DetalleVentaViewModel>
+@{
+    ViewBag.Title = "Detalle de Venta";
+
+    var venta = ViewBag.Venta as GameOfBreak.Areas.Admin.Models.VentaViewModel;
+}
+
+<h2>Detalle de la venta</h2>
+
+<div class="well well-sm row">
+    <div class="col-sm-6">
+        <h5>Cliente: </h5>
+        <h6>@(venta.Cliente.PrimerNombre + " " + venta.Cliente.ApellidoPaterno)</h6>
+    </div>
+    <div class="col-sm-6">
+        <h5>Usuario: </h5><h6>@(venta.Cliente.UserName)</h6>
+    </div>
+</div>
+<hr />
+<div class="well well-sm row">
+    <div class="col-sm-6">
+        <h5>Vendedor: </h5>
+        @if (venta.Empleado.Id.Equals(GameOfBreak.Models.Roles.UsuarioAdministradorID)) {
+            <h6>No aplica</h6>
+        } else {
+            //venta.Empleado.UserName
+            <h6>@(venta.Empleado.PrimerNombre + " " + venta.Empleado.ApellidoPaterno)</h6>
+        }
+    </div>
+    <div class="col-sm-6">
+        <h5>Usuario: </h5>
+        @if (venta.Empleado.Id.Equals(GameOfBreak.Models.Roles.UsuarioAdministradorID)) {
+            <h6>No aplica</h6>
+        } else {
+            //venta.Empleado.UserName
+            <h6>@(venta.Empleado.UserName)</h6>
+        }
+    </div>
+</div>
+
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th>UPC</th>
+            <th>Producto</th>
+            <th>Plataforma</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var producto in Model) {
+            <tr>
+                <td>@producto.Producto.UPC</td>
+                <td>@producto.Producto.Titulo</td>
+                <td>@producto.Producto.Plataforma</td>
+                <td>@producto.Cantidad</td>
+                <td>@producto.Monto</td>
+            </tr>
+        }
+    </tbody>
+</table>

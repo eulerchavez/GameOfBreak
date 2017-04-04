@@ -1,0 +1,61 @@
+﻿@model GameOfBreak.Areas.Admin.Models.AccesorioViewModel
+@{
+
+    var nombre = String.IsNullOrEmpty(Model.Accesorio.Nombre) ? "Nuevo accesorio" : Model.Accesorio.Nombre;
+    ViewBag.Title = nombre;
+    var consolas = Model.Plataformas;
+}
+
+<h2>@nombre</h2>
+
+@using (Html.BeginForm("GuardarAccesorio", "Producto")) {
+
+    @Html.AntiForgeryToken()
+
+    if (String.IsNullOrEmpty(Model.Plataforma.Plataforma1)) {
+        @Html.Hidden("Plataforma.Plataforma1", "none")
+    } else {
+        @Html.HiddenFor(acc => acc.Plataforma.Plataforma1)
+    }
+
+    <div class="form-group">
+        @Html.LabelFor(acc => acc.Accesorio.UPC)
+        @Html.TextBoxFor(acc => acc.Accesorio.UPC, new { @class = "form-control" })
+        @Html.ValidationMessageFor(acc => acc.Accesorio.UPC)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(acc => acc.Accesorio.Nombre)
+        @Html.TextBoxFor(acc => acc.Accesorio.Nombre, new { @class = "form-control" })
+        @Html.ValidationMessageFor(acc => acc.Accesorio.Nombre)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(vj => vj.Plataforma.ID_PLATAFORMA)
+        @Html.DropDownListFor(vj => vj.Plataforma.ID_PLATAFORMA, new SelectList(consolas, "ID_PLATAFORMA", "Plataforma1"), "Selecciona la consola", new { @class = "form-control" })
+        @Html.ValidationMessageFor(vj => vj.Plataforma.ID_PLATAFORMA)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(acc => acc.Accesorio.Descripcion)
+        @Html.TextAreaFor(acc => acc.Accesorio.Descripcion, new { @class = "form-control" })
+        @Html.ValidationMessageFor(acc => acc.Accesorio.Descripcion)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(acc => acc.Accesorio.FechaSalida)
+        @Html.TextBoxFor(acc => acc.Accesorio.FechaSalida, "{0: yyyy/MM/dd}", new { @class = "form-control" })
+        @Html.ValidationMessageFor(acc => acc.Accesorio.FechaSalida)
+    </div>
+
+    @Html.HiddenFor(acc => acc.UPC)
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+}

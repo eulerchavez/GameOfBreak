@@ -1,0 +1,26 @@
+﻿@model GameOfBreak.Models.GoB.Ciudad
+@{
+    var nombreCiudad = Model != null ? Model.Ciudad1 : "Nueva ciudad";
+    ViewBag.Title = nombreCiudad;
+}
+
+<h2>@nombreCiudad</h2>
+
+@using (Html.BeginForm("GuardarCiudad", "Directorio")) {
+
+    <div class="form-group">
+        @Html.LabelFor(ciu => ciu.Ciudad1)
+        @Html.TextBoxFor(ciu => ciu.Ciudad1, new { @class = "form-control" })
+        @Html.ValidationMessageFor(ciu => ciu.Ciudad1)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval");
+
+}
+

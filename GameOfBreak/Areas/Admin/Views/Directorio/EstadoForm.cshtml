@@ -1,0 +1,33 @@
+﻿@model GameOfBreak.Models.GoB.Estado
+@{
+    var nombreEstado = Model.ID_ESTADO <= 0
+        ? "Nuevo estado"
+        : Model.Estado1;
+
+    ViewBag.Title = nombreEstado;
+}
+
+<h2>@nombreEstado</h2>
+
+@using (Html.BeginForm("GuardarEstado", "Directorio")) {
+
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(edo => edo.ID_ESTADO)
+
+    <div class="form-group">
+        @Html.LabelFor(edo => edo.Estado1)
+        @Html.TextBoxFor(edo => edo.Estado1, new { @class = "form-control" })
+        @Html.ValidationMessageFor(edo => edo.Estado1)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval");
+
+}
+

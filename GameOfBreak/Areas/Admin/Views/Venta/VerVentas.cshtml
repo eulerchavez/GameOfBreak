@@ -1,0 +1,69 @@
+﻿@model GameOfBreak.Models.PaginationViewModel<GameOfBreak.Areas.Admin.Models.VentaViewModel>
+@{
+    ViewBag.Title = "Ventas";
+    var tienda = ViewBag.Tienda as GameOfBreak.Models.GoB.Tienda;
+    var ventas = Model.Items;
+    var pager = Model.Pager;
+
+}
+
+<h2>Ventas de: @tienda.Nombre</h2>
+
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th>Numero de la Tienda</th>
+            <th>Nombre de la Tienda</th>
+            <th>Nombre del Empleado</th>
+            <th>Usuario del Empleado</th>
+            <th>Nombre del Cliente</th>
+            <th>Usuario</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in ventas) {
+            <tr>
+                <td>@tienda.NumeroTienda</td>
+                <td>@tienda.Nombre</td>
+                @if (item.Empleado.Id.Equals(GameOfBreak.Models.Roles.AdministradorId)) {
+                    <td>@(item.Empleado.PrimerNombre + " " + item.Empleado.ApellidoPaterno)</td>
+                    <td>@(item.Empleado.UserName)</td>
+                } else {
+                    <td>No aplica</td>
+                    <td>No aplica</td>
+                }
+                <td>@(item.Cliente.PrimerNombre + " " + item.Cliente.ApellidoPaterno)</td>
+                <td>@(item.Cliente.UserName)</td>
+                <td>@String.Format("{0:yyyy/MM/dd}", item.Venta.Fecha)</td>
+                <td>
+                    @Html.ActionLink("Detalle de la venta", "DetalleVenta", "Venta", new { idVenta = item.Venta.ID_VENTA }, new { @class = "btn btn-default"})
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+
+<div class="row">
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+
+            @for (int i = pager.StartPage; i <= pager.EndPage; i++) {
+                <li class="@(i == pager.CurrentPage ? " active": ")" )">@Html.ActionLink(i.ToString(), "VerVentas", "Venta", new { idTienda = tienda.ID_TIENDA, page = i, count = pager.TotalItems }, null)</li>
+            }
+
+        </ul>
+    </nav>
+
+    <div>
+        Total de registros obtenidos:
+        <div class="badge">
+            @pager.TotalItems
+        </div>
+    </div>
+
+</div>

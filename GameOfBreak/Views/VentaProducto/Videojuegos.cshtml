@@ -1,0 +1,70 @@
+﻿@model GameOfBreak.Models.PaginationViewModel<GameOfBreak.Models.ProductoVentaViewModel>
+@{
+    ViewBag.Title = "Videojuegos";
+    var plataforma = ViewBag.Plataforma;
+    byte count = 0;
+    var pager = Model.Pager;
+    var idConsola = ViewBag.IdConsola;
+}
+
+<h2>Videojuegos</h2>
+
+<ol class="breadcrumb">
+    <li>@Html.ActionLink("Game Of Break", "Index", "Home")</li>
+    <li class="active">@plataforma</li>
+</ol>
+
+<div class="row">
+    @foreach (var item in Model.Items) {
+
+        <div class="col-sm-6 col-md-4">
+            <div class="thumbnail">
+                <img src="@item.Ruta" alt="Imagen" />
+                <div class="caption">
+                    <h2>@Html.ActionLink(item.Nombre, "VerDetalleVideojuego", "VentaProducto", new { upc = item.UPC }, null)</h2>
+                    <h6>@item.Estatus.Estatus1</h6>
+                    <h3>@item.Desarrolladora.Desarrolladora1</h3>
+                    <h4>Precio: @String.Format("{0:C}", item.Precio)</h4>
+                    <h5>Clasificación: @item.Clasificacion.Clasificacion1</h5>
+                    <h5>Género: @item.Genero.Genero1</h5>
+                    <h5>Fecha de lanzamiento: @String.Format("{0: dd/MM/yyyy}", item.FechaSalida)</h5>
+                    @Html.ActionLink("Agregar al carrito", "AgregarAlCarrito", "ShoppingCart", new { upc = item.UPC }, new { @class = "btn btn-default" })
+                </div>
+            </div>
+        </div>
+
+        count++;
+        if (count == 2) {
+            <div class="clearfix visible-sm-block"></div>
+        } else if (count == 3) {
+            count = 0;
+            <div class="clearfix visible-md-block visible-lg-block"></div>
+        }
+
+    }
+</div>
+
+@if (idConsola != 0) {
+
+    <div class="row">
+
+        <nav aria-label="Page navigation" class="col-sm-6">
+            <ul class="pagination">
+
+                @for (int i = pager.StartPage; i <= pager.EndPage; i++) {
+                    <li class="@(i == pager.CurrentPage ? " active": ")" )">@Html.ActionLink(i.ToString(), "Videojuegos", "VentaProducto", new { idConsola = idConsola, page = i, count = pager.TotalItems }, null)</li>
+                }
+
+            </ul>
+        </nav>
+
+        <div class="col-sm-6">
+            Total de registros obtenidos:
+            <div class="badge">
+                @pager.TotalItems
+            </div>
+        </div>
+
+    </div>
+
+}

@@ -1,0 +1,31 @@
+﻿@model GameOfBreak.Models.GoB.Desarrolladora
+
+@{
+    var nombre = Model.ID_DESARROLLADORA != 0 ? Model.Desarrolladora1 : "Nueva desarrolladora";
+
+    ViewBag.Title = nombre;
+}
+
+<h2>@nombre</h2>
+
+@using (Html.BeginForm("GuardarDesarrolladora", "ProductoDetalle")) {
+
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(des => des.ID_DESARROLLADORA)
+
+    <div class="form-group">
+        @Html.LabelFor(des => des.Desarrolladora1)
+        @Html.TextBoxFor(des => des.Desarrolladora1, new { @class = "form-control"})
+        @Html.ValidationMessageFor(des => des.Desarrolladora1)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+}
+
+@section scripts {
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+}
