@@ -19,15 +19,15 @@ namespace GameOfBreak.Models {
         [Display(Name = "Titulo")]
         public string Nombre { get; set; }
 
-        public Estatus Estatus { get; set; }
+        public string Estatus { get; set; }
 
-        public Desarrolladora Desarrolladora { get; set; }
+        public string Desarrolladora { get; set; }
 
         public decimal Precio { get; set; }
 
-        public Clasificacion Clasificacion { get; set; }
+        public string Clasificacion { get; set; }
 
-        public Genero Genero { get; set; }
+        public string Genero { get; set; }
 
         [Display(Name = "Fecha de salida")]
         [Column(TypeName = "date")]

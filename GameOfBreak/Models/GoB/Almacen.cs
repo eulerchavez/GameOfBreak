@@ -30,11 +30,11 @@ namespace GameOfBreak.Models.GoB
         [Range(0, 15000)]
         public decimal Precio { get; set; }
 
-        //public Descuento Descuento { get; set; }
+        public virtual Descuento Descuento { get; set; }
 
-        //public Estatus Estatus { get; set; }
+        public virtual Estatus Estatus { get; set; }
 
-        //public Tienda Tienda { get; set; }
+        public virtual Tienda Tienda { get; set; }
 
     }
 

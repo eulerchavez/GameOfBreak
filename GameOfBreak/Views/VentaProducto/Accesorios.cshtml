@@ -22,7 +22,7 @@
                 <img src="@item.Ruta" alt="Imagen" />
                 <div class="caption">
                     <h2>@Html.ActionLink(item.Nombre, "VerDetalleAccesorio", "VentaProducto", new { upc = item.UPC }, null)</h2>
-                    <h6>@item.Estatus.Estatus1</h6>
+                    <h6>@item.Estatus</h6>
                     <h4>Precio: @String.Format("{0:C}", item.Precio)</h4>
                     <h5>Fecha de lanzamiento: @String.Format("{0: dd/MM/yyyy}", item.FechaSalida)</h5>
                     @Html.ActionLink("Agregar al carrito", "AgregarAlCarrito", "ShoppingCart", new { upc = item.UPC }, new { @class = "btn btn-default" })

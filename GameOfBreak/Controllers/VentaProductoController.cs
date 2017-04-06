@@ -15,18 +15,18 @@ namespace GameOfBreak.Controllers {
 
         private GameOfBreakModel _context;
 
-        public VentaProductoController () {
+        public VentaProductoController() {
             this._context = new GameOfBreakModel();
         }
 
-        protected override void Dispose (bool disposing) {
+        protected override void Dispose(bool disposing) {
             this._context = new GameOfBreakModel();
         }
 
         #region Videojuegos
 
         // GET: Producto
-        public ActionResult Videojuegos (int idConsola, int? idGenero, int? page, int? count) {
+        public ActionResult Videojuegos(int idConsola, int? idGenero, int? page, int? count) {
 
             var existeConsola = this._context.Plataforma
                                         .Where(plat => plat.ID_PLATAFORMA == idConsola)
@@ -47,13 +47,15 @@ namespace GameOfBreak.Controllers {
             var upc = this._context.Almacen.Where(almacen => almacen.ID_TIENDA == 1).Select(almacen => almacen.UPC).AsEnumerable();
 
             // Se seleccionan aquellos que son solamente videojuegos
-            var listaUpcVideojuegos = this._context.VideoJuego.Where(vj => upc.Contains(vj.UPC)).Select(vj => vj.UPC).AsEnumerable();
+            var listaUpcVideojuegos = this._context.VideoJuego.Where(vj => upc.Contains(vj.UPC))
+                                                              .Select(vj => vj.UPC)
+                                                              .ToList();
 
             // Se selecciona aquellos que son de la plataforma especificada
             IEnumerable<string> upcProductos = this._context.RelProductoPlataforma.Where(rel => rel.ID_PLATAFORMA == idConsola
                                                                             && listaUpcVideojuegos.Contains(rel.UPC))
                                                                  .Select(rel => rel.UPC)
-                                                                 .AsEnumerable(); ;
+                                                                 .ToList();
 
             count = upcProductos.Count();
 
@@ -64,32 +66,48 @@ namespace GameOfBreak.Controllers {
             // Creamos el Pager
             var pager = new Pager(count.Value, page, 6);
 
-            // Obtenemos el detalle de cada producto, en este caso, videojuegos
+            //Obtenemos el detalle de cada producto, en este caso, videojuegos
+
             var videojuegos = this._context.VideoJuego
+                                           .Include(vj => vj.Clasificacion)
+                                           .Include(vj => vj.Genero)
+                                           .Include(vj => vj.Desarrolladora)
                                            .Where(videojuego => upcProductos.Contains(videojuego.UPC))
                                            .OrderByDescending(videojuego => videojuego.FechaSalida)
                                            .Skip((pager.CurrentPage - 1) * 6)
                                            .Take(6)
-                                           .Select(videojuego => new ProductoVentaViewModel() {
-                                               UPC = videojuego.UPC,
-                                               Nombre = videojuego.Nombre,
-                                               Estatus = this._context.Estatus.Where(estatus => estatus.ID_ESTATUS == (this._context.Almacen
-                                                                                                                                    .Where(almacen => almacen.UPC.Equals(videojuego.UPC) 
-                                                                                                                                                   && almacen.ID_TIENDA == 1)
-                                                                                                                                    .Select(almacen => almacen.ID_ESTATUS)
-                                                                                                                                    .FirstOrDefault()))
-                                                                              .FirstOrDefault(),
-                                               Precio = this._context.Almacen.Where(almacen => almacen.UPC.Equals(videojuego.UPC) && almacen.ID_TIENDA == 1).Select(almacen => almacen.Precio).FirstOrDefault(),
-                                               Clasificacion = this._context.Clasificacion.Where(clasificacion => clasificacion.ID_CLASIFICACION == videojuego.ID_CLASIFICACION).FirstOrDefault(),
-                                               Genero = this._context.Genero.Where(genero => genero.ID_GENERO == videojuego.ID_GENERO).FirstOrDefault(),
-                                               Desarrolladora = this._context.Desarrolladora.Where(consola => consola.ID_DESARROLLADORA == videojuego.ID_DESARROLLADORA ).FirstOrDefault(),
-                                               FechaSalida = videojuego.FechaSalida,
-                                               Ruta = this._context.RepositorioMultimedia.Where(rep => rep.ID_TIPO_MULTIMEDIA == 1 && rep.UPC.Equals(videojuego.UPC)).FirstOrDefault().Ruta
-                                           })
-                                           .AsEnumerable();
+                                           //.Select(videojuego => new ProductoVentaViewModel() {
+                                           //    UPC = videojuego.UPC,
+                                           //    Nombre = videojuego.Nombre,
+                                           //    Estatus = this._context.Estatus.Where(estatus => estatus.ID_ESTATUS == (this._context.Almacen
+                                           //                                                                                         .Where(almacen => almacen.UPC.Equals(videojuego.UPC)
+                                           //                                                                                                        && almacen.ID_TIENDA == 1)
+                                           //                                                                                         .Select(almacen => almacen.ID_ESTATUS)
+                                           //                                                                                         .FirstOrDefault()))
+                                           //                                   .FirstOrDefault(),
+                                           //    Precio = this._context.Almacen.Where(almacen => almacen.UPC.Equals(videojuego.UPC) && almacen.ID_TIENDA == 1).Select(almacen => almacen.Precio).FirstOrDefault(),
+                                           //    Clasificacion = videojuego.Clasificacion.Clasificacion1,
+                                           //    Genero = videojuego.Genero.Genero1,
+                                           //    Desarrolladora = videojuego.Desarrolladora.Desarrolladora1,
+                                           //    FechaSalida = videojuego.FechaSalida,
+                                           //    Ruta = this._context.RepositorioMultimedia.Where(rep => rep.ID_TIPO_MULTIMEDIA == 1 && rep.UPC.Equals(videojuego.UPC)).FirstOrDefault().Ruta
+                                           //})
+                                           .ToList();
+
+            var vjSelectos = videojuegos.Select(vj => new ProductoVentaViewModel() {
+                UPC = vj.UPC,
+                Nombre = vj.Nombre,
+                Estatus = this._context.Almacen.Include(a => a.Estatus).FirstOrDefault(a => a.UPC.Equals(vj.UPC) && a.ID_TIENDA == 1).Estatus.Estatus1,
+                Precio = this._context.Almacen.FirstOrDefault(a => a.UPC.Equals(vj.UPC) && a.ID_TIENDA == 1).Precio,
+                Clasificacion = vj.Clasificacion.Clasificacion1,
+                Genero = vj.Genero.Genero1,
+                Desarrolladora = vj.Desarrolladora.Desarrolladora1,
+                FechaSalida = vj.FechaSalida,
+                Ruta = this._context.RepositorioMultimedia.FirstOrDefault(rep => rep.ID_TIPO_MULTIMEDIA == 1 && rep.UPC.Equals(vj.UPC))?.Ruta
+            }).ToList();
 
             var viewModel = new PaginationViewModel<ProductoVentaViewModel>() {
-                Items = videojuegos,
+                Items = vjSelectos,
                 Pager = pager
             };
 
@@ -100,7 +118,7 @@ namespace GameOfBreak.Controllers {
 
         }
 
-        public ActionResult VerDetalleVideojuego (string upc) {
+        public ActionResult VerDetalleVideojuego(string upc) {
 
             var videojuego = this._context.VideoJuego
                                           .Include(vj => vj.Genero)
@@ -110,7 +128,7 @@ namespace GameOfBreak.Controllers {
                                           .FirstOrDefault();
 
             if (videojuego == null) {
-                return HttpNotFound("No se encuetnra el videojuego especificado.");
+                return HttpNotFound("No se ha encontrado el producto especificado.");
             }
 
             var viewModel = new VideojuegoDetalleViewModel() {
@@ -118,7 +136,7 @@ namespace GameOfBreak.Controllers {
                 Precio = this._context.Almacen.Where(almacen => almacen.UPC.Equals(videojuego.UPC) && almacen.ID_TIENDA == 1).Select(almacen => almacen.Precio).FirstOrDefault(),
                 Rating = this._context.Rating.Where(rating => rating.UPC.Equals(videojuego.UPC)).FirstOrDefault(),
                 Repositorio = this._context.RepositorioMultimedia.Include(rep => rep.TipoMultimedia).Where(rep => rep.UPC.Equals(videojuego.UPC)).AsEnumerable(),
-                Consola = this._context.Plataforma.Where(plat => plat.ID_PLATAFORMA== (this._context.RelProductoPlataforma.Where(rel => rel.UPC.Equals(videojuego.UPC)).Select(rel => rel.ID_PLATAFORMA).FirstOrDefault())).FirstOrDefault(),
+                Consola = this._context.Plataforma.Where(plat => plat.ID_PLATAFORMA == (this._context.RelProductoPlataforma.Where(rel => rel.UPC.Equals(videojuego.UPC)).Select(rel => rel.ID_PLATAFORMA).FirstOrDefault())).FirstOrDefault(),
                 Estatus = this._context.Estatus.Where(estatus => estatus.ID_ESTATUS == (this._context.Almacen.Where(al => al.UPC.Equals(videojuego.UPC) && al.ID_TIENDA == 1).Select(al => al.ID_ESTATUS).FirstOrDefault())).FirstOrDefault()
             };
 
@@ -130,7 +148,7 @@ namespace GameOfBreak.Controllers {
 
         #region Accesorios
 
-        public ActionResult Accesorios (int idConsola, int? idGenero, int? page, int? count) {
+        public ActionResult Accesorios(int idConsola, int? idGenero, int? page, int? count) {
 
             var existeConsola = this._context.Plataforma
                                         .Where(plat => plat.ID_PLATAFORMA == idConsola)
@@ -172,24 +190,37 @@ namespace GameOfBreak.Controllers {
             var accesorios = this._context.Accesorio
                                            .Where(accesorio => upcPoductos.Contains(accesorio.UPC))
                                            .OrderByDescending(videojuego => videojuego.FechaSalida)
-                                           .Skip((pager.CurrentPage - 1) * 6).Take(6)
-                                           .Select(accesorio => new ProductoVentaViewModel() {
-                                               UPC = accesorio.UPC,
-                                               Nombre = accesorio.Nombre,
-                                               Estatus = this._context.Estatus.Where(estatus => estatus.ID_ESTATUS == (this._context.Almacen
-                                                                                                                                    .Where(almacen => almacen.UPC.Equals(accesorio.UPC)
-                                                                                                                                                   && almacen.ID_TIENDA == 1)
-                                                                                                                                    .Select(almacen => almacen.ID_ESTATUS)
-                                                                                                                                    .FirstOrDefault()))
-                                                                              .FirstOrDefault(),
-                                               Precio = this._context.Almacen.Where(almacen => almacen.UPC.Equals(accesorio.UPC) && almacen.ID_TIENDA == 1).Select(almacen => almacen.Precio).FirstOrDefault(),
-                                               FechaSalida = accesorio.FechaSalida,
-                                               Ruta = this._context.RepositorioMultimedia.Where(rep => rep.ID_TIPO_MULTIMEDIA == 1 && rep.UPC.Equals(accesorio.UPC)).FirstOrDefault().Ruta
-                                           })
-                                           .AsEnumerable();
+                                           .Skip((pager.CurrentPage - 1) * 6)
+                                           .Take(6)
+                                           //.Select(accesorio => new ProductoVentaViewModel() {
+                                           //    UPC = accesorio.UPC,
+                                           //    Nombre = accesorio.Nombre,
+                                           //    //Estatus = this._context.Estatus.Where(estatus => estatus.ID_ESTATUS == (this._context.Almacen
+                                           //    //                                                                                     .Where(almacen => almacen.UPC.Equals(accesorio.UPC)
+                                           //    //                                                                                                    && almacen.ID_TIENDA == 1)
+                                           //    //                                                                                     .Select(almacen => almacen.ID_ESTATUS)
+                                           //    //                                                                                     .FirstOrDefault()))
+                                           //    //                               .FirstOrDefault(),
+                                           //    Estatus = this._context.Almacen.Include(a => a.Estatus).FirstOrDefault(a => a.UPC.Equals(accesorio.UPC) && a.ID_TIENDA == 1).Estatus.Estatus1,
+                                           //    //Precio = this._context.Almacen.Where(almacen => almacen.UPC.Equals(accesorio.UPC) && almacen.ID_TIENDA == 1).Select(almacen => almacen.Precio).FirstOrDefault(),
+                                           //    Precio = this._context.Almacen.FirstOrDefault(a => a.UPC.Equals(accesorio.UPC) && a.ID_TIENDA == 1).Precio,
+                                           //    FechaSalida = accesorio.FechaSalida,
+                                           //    Ruta = this._context.RepositorioMultimedia.Where(rep => rep.ID_TIPO_MULTIMEDIA == 1 && rep.UPC.Equals(accesorio.UPC)).FirstOrDefault().Ruta
+                                           //})
+                                           .ToList();
+
+            var accesoriosSelectos = accesorios.Select(accesorio => new ProductoVentaViewModel() {
+                UPC = accesorio.UPC,
+                Nombre = accesorio.Nombre,
+                Estatus = this._context.Almacen.Include(a => a.Estatus).FirstOrDefault(a => a.UPC.Equals(accesorio.UPC) && a.ID_TIENDA == 1).Estatus.Estatus1,
+                Precio = this._context.Almacen.FirstOrDefault(a => a.UPC.Equals(accesorio.UPC) && a.ID_TIENDA == 1).Precio,
+                FechaSalida = accesorio.FechaSalida,
+                Ruta = this._context.RepositorioMultimedia.FirstOrDefault(rep => rep.ID_TIPO_MULTIMEDIA == 1 && rep.UPC.Equals(accesorio.UPC))?.Ruta
+            }).ToList();
 
             var viewModel = new PaginationViewModel<ProductoVentaViewModel>() {
-                Items = accesorios,
+                Items = accesoriosSelectos,
+                //Items = accesorios,
                 Pager = pager
             };
 
@@ -200,7 +231,7 @@ namespace GameOfBreak.Controllers {
 
         }
 
-        public ActionResult VerDetalleAccesorio (string upc) {
+        public ActionResult VerDetalleAccesorio(string upc) {
 
             var accesorio = this._context.Accesorio
                                           .Where(vj => vj.UPC.Equals(upc))
@@ -215,7 +246,7 @@ namespace GameOfBreak.Controllers {
                 Precio = this._context.Almacen.Where(almacen => almacen.UPC.Equals(accesorio.UPC) && almacen.ID_TIENDA == 1).Select(almacen => almacen.Precio).FirstOrDefault(),
                 Repositorio = this._context.RepositorioMultimedia.Include(rep => rep.TipoMultimedia).Where(rep => rep.UPC.Equals(accesorio.UPC)).AsEnumerable(),
                 Estatus = this._context.Estatus.Where(estatus => estatus.ID_ESTATUS == (this._context.Almacen.Where(al => al.UPC.Equals(accesorio.UPC) && al.ID_TIENDA == 1).Select(al => al.ID_ESTATUS).FirstOrDefault())).FirstOrDefault(),
-                Consola = this._context.Plataforma.Where(plat => plat.ID_PLATAFORMA== (this._context.RelProductoPlataforma.Where(rel => rel.UPC.Equals(accesorio.UPC)).Select(rel => rel.ID_PLATAFORMA).FirstOrDefault())).FirstOrDefault(),
+                Consola = this._context.Plataforma.Where(plat => plat.ID_PLATAFORMA == (this._context.RelProductoPlataforma.Where(rel => rel.UPC.Equals(accesorio.UPC)).Select(rel => rel.ID_PLATAFORMA).FirstOrDefault())).FirstOrDefault(),
             };
 
             return View(viewModel);
@@ -226,15 +257,15 @@ namespace GameOfBreak.Controllers {
 
         #region Genero
 
-        public ActionResult PorGenero (int idConsola, int idGenero, int? page, int? count) {
+        public ActionResult PorGenero(int idConsola, int idGenero, int? page, int? count) {
 
-            var consola = this._context.Plataforma.Where(plat => plat.ID_PLATAFORMA == idConsola).FirstOrDefault();
+            var consola = this._context.Plataforma.FirstOrDefault(plat => plat.ID_PLATAFORMA == idConsola);
 
             if (consola == null) {
                 return HttpNotFound("No se encuentra la plataforma.");
             }
 
-            var genero = this._context.Genero.Where(gen => gen.ID_GENERO == idGenero).FirstOrDefault();
+            var genero = this._context.Genero.FirstOrDefault(gen => gen.ID_GENERO == idGenero);
 
             if (genero == null) {
                 return HttpNotFound("No se encuentra el género.");
@@ -247,7 +278,9 @@ namespace GameOfBreak.Controllers {
                 page = 1;
             }
 
-            var upcAlmacen = this._context.Almacen.Where(al => al.ID_TIENDA == 1).Select(al => al.UPC).AsEnumerable();
+            var upcPlataforma = this._context.RelProductoPlataforma.Where(p => p.ID_PLATAFORMA == idConsola).Select(p => p.UPC).ToList();
+
+            var upcAlmacen = this._context.Almacen.Where(al => al.ID_TIENDA == 1 && upcPlataforma.Contains(al.UPC)).Select(al => al.UPC).ToList();
 
             var upcProductos = this._context.VideoJuego.Where(vj => upcAlmacen.Contains(vj.UPC) && vj.ID_GENERO == idGenero).Select(vj => vj.UPC).AsEnumerable();
 
@@ -257,29 +290,46 @@ namespace GameOfBreak.Controllers {
 
             // Obtenemos el detalle de cada producto, en este caso, videojuegos
             var videojuegos = this._context.VideoJuego
+                                           .Include(vj => vj.Clasificacion)
+                                           .Include(vj => vj.Genero)
+                                           .Include(vj => vj.Desarrolladora)
                                            .Where(videojuego => upcProductos.Contains(videojuego.UPC) && videojuego.ID_GENERO == idGenero)
                                            .OrderByDescending(videojuego => videojuego.FechaSalida)
                                            .Skip((pager.CurrentPage - 1) * 6).Take(6)
-                                           .Select(videojuego => new ProductoVentaViewModel() {
-                                               UPC = videojuego.UPC,
-                                               Nombre = videojuego.Nombre,
-                                               Estatus = this._context.Estatus.Where(estatus => estatus.ID_ESTATUS == (this._context.Almacen
-                                                                                                                                    .Where(almacen => almacen.UPC.Equals(videojuego.UPC)
-                                                                                                                                                   && almacen.ID_TIENDA == 1)
-                                                                                                                                    .Select(almacen => almacen.ID_ESTATUS)
-                                                                                                                                    .FirstOrDefault()))
-                                                                              .FirstOrDefault(),
-                                               Precio = this._context.Almacen.Where(almacen => almacen.UPC.Equals(videojuego.UPC) && almacen.ID_TIENDA == 1).Select(almacen => almacen.Precio).FirstOrDefault(),
-                                               Clasificacion = this._context.Clasificacion.Where(clasificacion => clasificacion.ID_CLASIFICACION == videojuego.ID_CLASIFICACION).FirstOrDefault(),
-                                               Genero = this._context.Genero.Where(gen => gen.ID_GENERO == idGenero).FirstOrDefault(),
-                                               Desarrolladora = this._context.Desarrolladora.Where(des => des.ID_DESARROLLADORA == videojuego.ID_DESARROLLADORA ).FirstOrDefault(),
-                                               FechaSalida = videojuego.FechaSalida,
-                                               Ruta = this._context.RepositorioMultimedia.Where(rep => rep.ID_TIPO_MULTIMEDIA == 1 && rep.UPC.Equals(videojuego.UPC)).FirstOrDefault().Ruta
-                                           })
-                                           .AsEnumerable();
+                                           //.Select(videojuego => new ProductoVentaViewModel() {
+                                           //    UPC = videojuego.UPC,
+                                           //    Nombre = videojuego.Nombre,
+                                           //    Estatus = this._context.Estatus.Where(estatus => estatus.ID_ESTATUS == (this._context.Almacen
+                                           //                                                                                         .Where(almacen => almacen.UPC.Equals(videojuego.UPC)
+                                           //                                                                                                        && almacen.ID_TIENDA == 1)
+                                           //                                                                                         .Select(almacen => almacen.ID_ESTATUS)
+                                           //                                                                                         .FirstOrDefault()))
+                                           //                                   .FirstOrDefault(),
+                                           //    Precio = this._context.Almacen.Where(almacen => almacen.UPC.Equals(videojuego.UPC) && almacen.ID_TIENDA == 1).Select(almacen => almacen.Precio).FirstOrDefault(),
+                                           //    Clasificacion = this._context.Clasificacion.Where(clasificacion => clasificacion.ID_CLASIFICACION == videojuego.ID_CLASIFICACION).FirstOrDefault(),
+                                           //    Genero = this._context.Genero.Where(gen => gen.ID_GENERO == idGenero).FirstOrDefault(),
+                                           //    Desarrolladora = this._context.Desarrolladora.Where(des => des.ID_DESARROLLADORA == videojuego.ID_DESARROLLADORA).FirstOrDefault(),
+                                           //    FechaSalida = videojuego.FechaSalida,
+                                           //    Ruta = this._context.RepositorioMultimedia.Where(rep => rep.ID_TIPO_MULTIMEDIA == 1 && rep.UPC.Equals(videojuego.UPC)).FirstOrDefault().Ruta
+                                           //})
+                                           .ToList();
+
+            var vjSelectos = videojuegos.Select(vj => new ProductoVentaViewModel() {
+                UPC = vj.UPC,
+                Nombre = vj.Nombre,
+                Estatus = this._context.Almacen.Include(a => a.Estatus).FirstOrDefault(a => a.UPC.Equals(vj.UPC) && a.ID_TIENDA == 1).Estatus.Estatus1,
+                Precio = this._context.Almacen.FirstOrDefault(a => a.UPC.Equals(vj.UPC) && a.ID_TIENDA == 1).Precio,
+                Clasificacion = vj.Clasificacion.Clasificacion1,
+                Genero = vj.Genero.Genero1,
+                Desarrolladora = vj.Desarrolladora.Desarrolladora1,
+                FechaSalida = vj.FechaSalida,
+                Ruta = this._context.RepositorioMultimedia.FirstOrDefault(rep => rep.ID_TIPO_MULTIMEDIA == 1 && rep.UPC.Equals(vj.UPC))?.Ruta
+            }).ToList();
+
 
             var viewModel = new PaginationViewModel<ProductoVentaViewModel>() {
-                Items = videojuegos,
+                //Items = videojuegos,
+                Items = vjSelectos,
                 Pager = pager
             };
 
@@ -293,7 +343,7 @@ namespace GameOfBreak.Controllers {
         #endregion
 
         [Authorize(Roles = "Cliente")]
-        public ActionResult VerCompras (int? page, int? count) {
+        public ActionResult VerCompras(int? page, int? count) {
 
             var idCliente = User.Identity.GetUserId();
 
@@ -314,7 +364,7 @@ namespace GameOfBreak.Controllers {
             var ventas = this._context.Venta
                                          .OrderBy(venta => venta.Fecha)
                                          .Where(venta => venta.ID_USUARIO == idCliente)
-                                         .Skip((pager.CurrentPage - 1) * 15 ).Take(15)
+                                         .Skip((pager.CurrentPage - 1) * 15).Take(15)
                                          .Select(venta => new VentaViewModel() {
                                              Venta = venta,
                                              Empleado = this._context.AspNetUsers.Where(usr => usr.Id.Equals(venta.ID_EMPLEADO))
@@ -363,7 +413,7 @@ namespace GameOfBreak.Controllers {
         }
 
         [Authorize(Roles = "Cliente")]
-        public ActionResult DetalleCompra (int idVenta) {
+        public ActionResult DetalleCompra(int idVenta) {
 
             var venta = this._context.Venta
                                          .Where(v => v.ID_VENTA == idVenta)
