@@ -6,58 +6,48 @@ using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
+using System.Data.Entity;
 using GameOfBreak.Models;
 using GameOfBreak.Models.GoB;
 using GameOfBreak.Areas.Admin.Models;
 
-namespace GameOfBreak.Controllers
-{
+namespace GameOfBreak.Controllers {
     [Authorize]
-    public class ManageController : Controller
-    {
+    public class ManageController : Controller {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
         private GameOfBreakModel _context;
 
-        public ManageController()
-        {
+        public ManageController() {
             this._context = new GameOfBreakModel();
         }
 
-        public ManageController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
-        {
+        public ManageController(ApplicationUserManager userManager, ApplicationSignInManager signInManager) {
             UserManager = userManager;
             SignInManager = signInManager;
         }
 
-        public ApplicationSignInManager SignInManager
-        {
-            get
-            {
+        public ApplicationSignInManager SignInManager {
+            get {
                 return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
             }
-            private set 
-            { 
-                _signInManager = value; 
+            private set {
+                _signInManager = value;
             }
         }
 
-        public ApplicationUserManager UserManager
-        {
-            get
-            {
+        public ApplicationUserManager UserManager {
+            get {
                 return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
             }
-            private set
-            {
+            private set {
                 _userManager = value;
             }
         }
 
         //
         // GET: /Manage/Index
-        public async Task<ActionResult> Index(ManageMessageId? message)
-        {
+        public async Task<ActionResult> Index(ManageMessageId? message) {
             ViewBag.StatusMessage =
                 message == ManageMessageId.ChangePasswordSuccess ? "Su contraseña se ha cambiado."
                 : message == ManageMessageId.SetPasswordSuccess ? "Su contraseña se ha establecido."
@@ -68,8 +58,7 @@ namespace GameOfBreak.Controllers
                 : "";
 
             var userId = User.Identity.GetUserId();
-            var model = new IndexViewModel
-            {
+            var model = new IndexViewModel {
                 HasPassword = HasPassword(),
                 PhoneNumber = await UserManager.GetPhoneNumberAsync(userId),
                 TwoFactor = await UserManager.GetTwoFactorEnabledAsync(userId),
@@ -83,21 +72,16 @@ namespace GameOfBreak.Controllers
         // POST: /Manage/RemoveLogin
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> RemoveLogin(string loginProvider, string providerKey)
-        {
+        public async Task<ActionResult> RemoveLogin(string loginProvider, string providerKey) {
             ManageMessageId? message;
             var result = await UserManager.RemoveLoginAsync(User.Identity.GetUserId(), new UserLoginInfo(loginProvider, providerKey));
-            if (result.Succeeded)
-            {
+            if (result.Succeeded) {
                 var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
-                if (user != null)
-                {
+                if (user != null) {
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                 }
                 message = ManageMessageId.RemoveLoginSuccess;
-            }
-            else
-            {
+            } else {
                 message = ManageMessageId.Error;
             }
             return RedirectToAction("ManageLogins", new { Message = message });
@@ -105,8 +89,7 @@ namespace GameOfBreak.Controllers
 
         //
         // GET: /Manage/AddPhoneNumber
-        public ActionResult AddPhoneNumber()
-        {
+        public ActionResult AddPhoneNumber() {
             return View();
         }
 
@@ -114,18 +97,14 @@ namespace GameOfBreak.Controllers
         // POST: /Manage/AddPhoneNumber
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> AddPhoneNumber(AddPhoneNumberViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
+        public async Task<ActionResult> AddPhoneNumber(AddPhoneNumberViewModel model) {
+            if (!ModelState.IsValid) {
                 return View(model);
             }
             // Generar el token y enviarlo
             var code = await UserManager.GenerateChangePhoneNumberTokenAsync(User.Identity.GetUserId(), model.Number);
-            if (UserManager.SmsService != null)
-            {
-                var message = new IdentityMessage
-                {
+            if (UserManager.SmsService != null) {
+                var message = new IdentityMessage {
                     Destination = model.Number,
                     Body = "Su código de seguridad es: " + code
                 };
@@ -138,12 +117,10 @@ namespace GameOfBreak.Controllers
         // POST: /Manage/EnableTwoFactorAuthentication
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EnableTwoFactorAuthentication()
-        {
+        public async Task<ActionResult> EnableTwoFactorAuthentication() {
             await UserManager.SetTwoFactorEnabledAsync(User.Identity.GetUserId(), true);
             var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
-            if (user != null)
-            {
+            if (user != null) {
                 await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
             }
             return RedirectToAction("Index", "Manage");
@@ -153,12 +130,10 @@ namespace GameOfBreak.Controllers
         // POST: /Manage/DisableTwoFactorAuthentication
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DisableTwoFactorAuthentication()
-        {
+        public async Task<ActionResult> DisableTwoFactorAuthentication() {
             await UserManager.SetTwoFactorEnabledAsync(User.Identity.GetUserId(), false);
             var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
-            if (user != null)
-            {
+            if (user != null) {
                 await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
             }
             return RedirectToAction("Index", "Manage");
@@ -166,8 +141,7 @@ namespace GameOfBreak.Controllers
 
         //
         // GET: /Manage/VerifyPhoneNumber
-        public async Task<ActionResult> VerifyPhoneNumber(string phoneNumber)
-        {
+        public async Task<ActionResult> VerifyPhoneNumber(string phoneNumber) {
             var code = await UserManager.GenerateChangePhoneNumberTokenAsync(User.Identity.GetUserId(), phoneNumber);
             // Enviar un SMS a través del proveedor de SMS para verificar el número de teléfono
             return phoneNumber == null ? View("Error") : View(new VerifyPhoneNumberViewModel { PhoneNumber = phoneNumber });
@@ -177,18 +151,14 @@ namespace GameOfBreak.Controllers
         // POST: /Manage/VerifyPhoneNumber
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> VerifyPhoneNumber(VerifyPhoneNumberViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
+        public async Task<ActionResult> VerifyPhoneNumber(VerifyPhoneNumberViewModel model) {
+            if (!ModelState.IsValid) {
                 return View(model);
             }
             var result = await UserManager.ChangePhoneNumberAsync(User.Identity.GetUserId(), model.PhoneNumber, model.Code);
-            if (result.Succeeded)
-            {
+            if (result.Succeeded) {
                 var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
-                if (user != null)
-                {
+                if (user != null) {
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                 }
                 return RedirectToAction("Index", new { Message = ManageMessageId.AddPhoneSuccess });
@@ -202,16 +172,13 @@ namespace GameOfBreak.Controllers
         // POST: /Manage/RemovePhoneNumber
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> RemovePhoneNumber()
-        {
+        public async Task<ActionResult> RemovePhoneNumber() {
             var result = await UserManager.SetPhoneNumberAsync(User.Identity.GetUserId(), null);
-            if (!result.Succeeded)
-            {
+            if (!result.Succeeded) {
                 return RedirectToAction("Index", new { Message = ManageMessageId.Error });
             }
             var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
-            if (user != null)
-            {
+            if (user != null) {
                 await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
             }
             return RedirectToAction("Index", new { Message = ManageMessageId.RemovePhoneSuccess });
@@ -219,8 +186,7 @@ namespace GameOfBreak.Controllers
 
         //
         // GET: /Manage/ChangePassword
-        public ActionResult ChangePassword()
-        {
+        public ActionResult ChangePassword() {
             return View();
         }
 
@@ -228,18 +194,14 @@ namespace GameOfBreak.Controllers
         // POST: /Manage/ChangePassword
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ChangePassword(ChangePasswordViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
+        public async Task<ActionResult> ChangePassword(ChangePasswordViewModel model) {
+            if (!ModelState.IsValid) {
                 return View(model);
             }
             var result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword, model.NewPassword);
-            if (result.Succeeded)
-            {
+            if (result.Succeeded) {
                 var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
-                if (user != null)
-                {
+                if (user != null) {
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                 }
                 return RedirectToAction("Index", new { Message = ManageMessageId.ChangePasswordSuccess });
@@ -250,8 +212,7 @@ namespace GameOfBreak.Controllers
 
         //
         // GET: /Manage/SetPassword
-        public ActionResult SetPassword()
-        {
+        public ActionResult SetPassword() {
             return View();
         }
 
@@ -259,16 +220,12 @@ namespace GameOfBreak.Controllers
         // POST: /Manage/SetPassword
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> SetPassword(SetPasswordViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
+        public async Task<ActionResult> SetPassword(SetPasswordViewModel model) {
+            if (ModelState.IsValid) {
                 var result = await UserManager.AddPasswordAsync(User.Identity.GetUserId(), model.NewPassword);
-                if (result.Succeeded)
-                {
+                if (result.Succeeded) {
                     var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
-                    if (user != null)
-                    {
+                    if (user != null) {
                         await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                     }
                     return RedirectToAction("Index", new { Message = ManageMessageId.SetPasswordSuccess });
@@ -282,22 +239,19 @@ namespace GameOfBreak.Controllers
 
         //
         // GET: /Manage/ManageLogins
-        public async Task<ActionResult> ManageLogins(ManageMessageId? message)
-        {
+        public async Task<ActionResult> ManageLogins(ManageMessageId? message) {
             ViewBag.StatusMessage =
                 message == ManageMessageId.RemoveLoginSuccess ? "Se ha quitado el inicio de sesión externo."
                 : message == ManageMessageId.Error ? "Se ha producido un error."
                 : "";
             var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
-            if (user == null)
-            {
+            if (user == null) {
                 return View("Error");
             }
             var userLogins = await UserManager.GetLoginsAsync(User.Identity.GetUserId());
             var otherLogins = AuthenticationManager.GetExternalAuthenticationTypes().Where(auth => userLogins.All(ul => auth.AuthenticationType != ul.LoginProvider)).ToList();
             ViewBag.ShowRemoveButton = user.PasswordHash != null || userLogins.Count > 1;
-            return View(new ManageLoginsViewModel
-            {
+            return View(new ManageLoginsViewModel {
                 CurrentLogins = userLogins,
                 OtherLogins = otherLogins
             });
@@ -307,29 +261,24 @@ namespace GameOfBreak.Controllers
         // POST: /Manage/LinkLogin
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult LinkLogin(string provider)
-        {
+        public ActionResult LinkLogin(string provider) {
             // Solicitar la redirección al proveedor de inicio de sesión externo para vincular un inicio de sesión para el usuario actual
             return new AccountController.ChallengeResult(provider, Url.Action("LinkLoginCallback", "Manage"), User.Identity.GetUserId());
         }
 
         //
         // GET: /Manage/LinkLoginCallback
-        public async Task<ActionResult> LinkLoginCallback()
-        {
+        public async Task<ActionResult> LinkLoginCallback() {
             var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync(XsrfKey, User.Identity.GetUserId());
-            if (loginInfo == null)
-            {
+            if (loginInfo == null) {
                 return RedirectToAction("ManageLogins", new { Message = ManageMessageId.Error });
             }
             var result = await UserManager.AddLoginAsync(User.Identity.GetUserId(), loginInfo.Login);
             return result.Succeeded ? RedirectToAction("ManageLogins") : RedirectToAction("ManageLogins", new { Message = ManageMessageId.Error });
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && _userManager != null)
-            {
+        protected override void Dispose(bool disposing) {
+            if (disposing && _userManager != null) {
                 _userManager.Dispose();
                 _userManager = null;
             }
@@ -337,12 +286,20 @@ namespace GameOfBreak.Controllers
             base.Dispose(disposing);
         }
 
-        public ActionResult EditarDatos (string idUsuario) {
+        public ActionResult EditarDatos(string idUsuario) {
+
+            var idRole = this._context.AspNetUserRoles
+                                      .Where(usrRole => usrRole.UserId.Equals(idUsuario))
+                                      .Select(usrRole => usrRole.RoleId)
+                                      .FirstOrDefault();
+
+            var role = this._context.AspNetRoles.FirstOrDefault(netRole => netRole.Id.Equals(idRole)).Name;
 
             var empleado = this._context.AspNetUsers
                                         .Where(usr => usr.Id.Equals(idUsuario))
                                         .Select(usr => new Usuario() {
-                                            Role = this._context.AspNetRoles.Where(role => role.Id.Equals(this._context.AspNetUserRoles.Where(usrRole => usrRole.UserId.Equals(usr.Id)).Select(usrRole => usrRole.RoleId).FirstOrDefault())).Select(role => role.Name).FirstOrDefault(),
+                                            //Role = this._context.AspNetRoles.Where(role => role.Id.Equals(this._context.AspNetUserRoles.Where(usrRole => usrRole.UserId.Equals(usr.Id)).Select(usrRole => usrRole.RoleId).FirstOrDefault())).Select(role => role.Name).FirstOrDefault(),
+                                            Role = role,
                                             Id = usr.Id,
                                             Email = usr.Email,
                                             PhoneNumber = usr.PhoneNumber,
@@ -373,44 +330,35 @@ namespace GameOfBreak.Controllers
         // Se usan para protección XSRF al agregar inicios de sesión externos
         private const string XsrfKey = "XsrfId";
 
-        private IAuthenticationManager AuthenticationManager
-        {
-            get
-            {
+        private IAuthenticationManager AuthenticationManager {
+            get {
                 return HttpContext.GetOwinContext().Authentication;
             }
         }
 
-        private void AddErrors(IdentityResult result)
-        {
-            foreach (var error in result.Errors)
-            {
+        private void AddErrors(IdentityResult result) {
+            foreach (var error in result.Errors) {
                 ModelState.AddModelError("", error);
             }
         }
 
-        private bool HasPassword()
-        {
+        private bool HasPassword() {
             var user = UserManager.FindById(User.Identity.GetUserId());
-            if (user != null)
-            {
+            if (user != null) {
                 return user.PasswordHash != null;
             }
             return false;
         }
 
-        private bool HasPhoneNumber()
-        {
+        private bool HasPhoneNumber() {
             var user = UserManager.FindById(User.Identity.GetUserId());
-            if (user != null)
-            {
+            if (user != null) {
                 return user.PhoneNumber != null;
             }
             return false;
         }
 
-        public enum ManageMessageId
-        {
+        public enum ManageMessageId {
             AddPhoneSuccess,
             ChangePasswordSuccess,
             SetTwoFactorSuccess,
@@ -420,6 +368,6 @@ namespace GameOfBreak.Controllers
             Error
         }
 
-#endregion
+        #endregion
     }
 }

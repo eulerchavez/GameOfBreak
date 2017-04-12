@@ -71,19 +71,37 @@ namespace GameOfBreak.Areas.Admin.Controllers {
 
             var pager = new Pager(count.Value, page, 60);
 
-            var listadoAlmacen = this._context.Almacen
+
+
+
+            var almacen = this._context.Almacen
                                               .Where(al => al.ID_TIENDA == idTienda)
                                               .OrderBy(al => al.Cantidad)
                                               .Skip((pager.CurrentPage - 1) * 60).Take(60)
-                                              .Select(al => new AlmacenViewModel() {
-                                                  Almacen = al,
-                                                  Videojuego = this._context.VideoJuego.Where(vj => vj.UPC.Equals(al.UPC)).FirstOrDefault(),
-                                                  Plataforma = this._context.Plataforma.Where(plat => plat.ID_PLATAFORMA == this._context.RelProductoPlataforma.Where(rel => rel.UPC.Equals(al.UPC)).FirstOrDefault().ID_PLATAFORMA).FirstOrDefault(),
-                                                  Accesorio  = this._context.Accesorio.Where(acc => acc.UPC.Equals(al.UPC)).FirstOrDefault(),
-                                                  Descuento = this._context.Descuento.Where(desc => desc.ID_DESCUENTO == al.ID_DESCUENTO).FirstOrDefault(),
-                                                  Estatus = this._context.Estatus.Where(est => est.ID_ESTATUS == al.ID_ESTATUS).FirstOrDefault()
-                                              })
-                                              .AsEnumerable();
+                                              //.Select(al => new AlmacenViewModel() {
+                                              //    Almacen = al,
+                                              //    Videojuego = this._context.VideoJuego.Where(vj => vj.UPC.Equals(al.UPC)).FirstOrDefault(),
+                                              //    //Plataforma = this._context.Plataforma.Where(plat => plat.ID_PLATAFORMA == this._context.RelProductoPlataforma.Where(rel => rel.UPC.Equals(al.UPC)).FirstOrDefault().ID_PLATAFORMA).FirstOrDefault(),
+                                              //    Accesorio  = this._context.Accesorio.Where(acc => acc.UPC.Equals(al.UPC)).FirstOrDefault(),
+                                              //    Descuento = this._context.Descuento.Where(desc => desc.ID_DESCUENTO == al.ID_DESCUENTO).FirstOrDefault(),
+                                              //    Estatus = this._context.Estatus.Where(est => est.ID_ESTATUS == al.ID_ESTATUS).FirstOrDefault()
+                                              //})
+                                              .ToList();
+
+            var upcs = almacen.Select(a => a.UPC).ToList();
+
+            var relPlataformas = this._context.RelProductoPlataforma.Where(relPP => upcs.Contains(relPP.UPC)).Select(relPP => relPP.ID_PLATAFORMA).ToList();
+
+            var plataformas = this._context.Plataforma.Where(p => relPlataformas.Contains(p.ID_PLATAFORMA)).ToList();
+
+            var listadoAlmacen = almacen.Select(al => new AlmacenViewModel() {
+                Almacen = al,
+                Videojuego = this._context.VideoJuego.Where(vj => vj.UPC.Equals(al.UPC)).FirstOrDefault(),
+                Plataforma = plataformas.Where(p => relPlataformas.Contains(p.ID_PLATAFORMA)).FirstOrDefault(),
+                Accesorio = this._context.Accesorio.Where(acc => acc.UPC.Equals(al.UPC)).FirstOrDefault(),
+                Descuento = this._context.Descuento.Where(desc => desc.ID_DESCUENTO == al.ID_DESCUENTO).FirstOrDefault(),
+                Estatus = this._context.Estatus.Where(est => est.ID_ESTATUS == al.ID_ESTATUS).FirstOrDefault()
+            }).ToList();
 
             var almacenViewModel = new AlmacenViewModels() {
                 Tienda = tienda,
@@ -223,20 +241,20 @@ namespace GameOfBreak.Areas.Admin.Controllers {
                                          .FirstOrDefault();
 
             // Si ya hay algun registro en el almacen
-            if (almacenBD != null) {
+            //if (almacenBD != null) {
 
-                ModelState.AddModelError("almacen.UPC", "El UPC ingresado ya se encuentrea registrado, favor de ingresar uno valido.");
+            //    ModelState.AddModelError("almacen.UPC", "El UPC ingresado ya se encuentrea registrado, favor de ingresar uno valido.");
 
-                var viewModel = new AlmacenFormViewModel() {
-                    UPC = almacenFormVM.UPC,
-                    Almacen = almacenFormVM.Almacen,
-                    Descuentos = this._context.Descuento.AsEnumerable(),
-                    Estatus = this._context.Estatus.AsEnumerable()
-                };
+            //    var viewModel = new AlmacenFormViewModel() {
+            //        UPC = almacenFormVM.UPC,
+            //        Almacen = almacenFormVM.Almacen,
+            //        Descuentos = this._context.Descuento.AsEnumerable(),
+            //        Estatus = this._context.Estatus.AsEnumerable()
+            //    };
 
-                return View("AlmacenForm", viewModel);
+            //    return View("AlmacenForm", viewModel);
 
-            }
+            //}
 
             #endregion
 

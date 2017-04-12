@@ -18,8 +18,8 @@ namespace GameOfBreak.Models.GoB
         [StringLength(128)]
         public string ID_EMPLEADO { get; set; }
 
-        public AspNetUsers AspNetUsers { get; set; }
+        //public virtual AspNetUsers AspNetUsers { get; set; }
 
-        public Tienda Tienda { get; set; }
+        //public virtual Tienda Tienda { get; set; }
     }
 }

@@ -59,7 +59,7 @@ namespace GameOfBreak.Areas.Admin.Controllers {
                     Genero = this._context.Genero.Where(g => g.ID_GENERO == vj.ID_GENERO).FirstOrDefault()
 
                 })
-            .AsEnumerable();
+            .ToList();
 
             var viewModel = new PaginationViewModel<VideojuegoViewModel>
             {

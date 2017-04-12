@@ -17,8 +17,8 @@
             <th>Nombre</th>
             <th>Email</th>
             <th>Teléfono local</th>
-            <th>Teléfono mobil</th>
-            <th>Némero de Tienda</th>
+            <th>Teléfono celular</th>
+            <th>Número de Tienda</th>
             <th>Tienda</th>
             <th>Role</th>
             @if (!User.IsInRole("Administrador")) {
@@ -36,7 +36,7 @@
                 <td>@item.Usuario.PhoneNumber</td>
                 <td>@(item?.Tienda?.NumeroTienda)</td>
                 <td>@(item?.Tienda?.Nombre)</td>
-                <td>@item.Role.Name</td>
+                <td>@(item.Role?.Name)</td>
                 @if (!User.IsInRole("Administrador")) {
                     <td>
                         <div class="dropdown">
