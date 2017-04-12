@@ -6,6 +6,7 @@ using Microsoft.AspNet.Identity.Owin;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -101,22 +102,28 @@ namespace GameOfBreak.Areas.Admin.Controllers {
                 //})
                 .ToList();
 
-            var idEmpleados = relTiendaEmpleados.Select(relTE => relTE.ID_EMPLEADO);
+            var idEmpleados = relTiendaEmpleados.Select(relTE => relTE.ID_EMPLEADO).ToList();
 
-            var idRolesEmpleados = this._context.AspNetUserRoles
+            var usrRoles = this._context.AspNetUserRoles
                                                 .Where(usrRole => idEmpleados.Contains(usrRole.UserId))
-                                                .Select(usrRole => usrRole.RoleId)
+                                                //.Select(usrRole => usrRole.RoleId)
                                                 .ToList();
 
             var rolesEmpleados = this._context.AspNetRoles
-                                              .Where(role => idRolesEmpleados.Contains(role.Id))
+                                              //.Where(role => idRolesEmpleados.Contains(role.Id))
                                               .ToList();
 
             var roles = relTiendaEmpleados.Select(relTE => new EmpleadoViewModel() {
                 Usuario = this._context.AspNetUsers.FirstOrDefault(usr => usr.Id.Equals(relTE.ID_EMPLEADO)),
-                Role = rolesEmpleados.FirstOrDefault(role => idRolesEmpleados.Contains(role.Id)),
+                Role = rolesEmpleados.Where(role => {
+
+                    var idRole = usrRoles.Where(r => r.UserId.Equals(relTE.ID_EMPLEADO)).FirstOrDefault().RoleId;
+
+                    return role.Id.Equals(idRole);
+
+                }).FirstOrDefault(),
                 Tienda = this._context.Tienda.FirstOrDefault(t => relTE.ID_TIENDA == t.ID_TIENDA)
-            });
+            }).ToList();
 
             ViewBag.IdTienda = idTienda;
 

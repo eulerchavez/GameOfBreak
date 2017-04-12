@@ -15,18 +15,18 @@ namespace GameOfBreak.Areas.Admin.Controllers {
 
         private GameOfBreakModel _context;
 
-        public ProductoController () {
+        public ProductoController() {
             this._context = new GameOfBreakModel();
         }
 
-        protected override void Dispose (bool disposing) {
+        protected override void Dispose(bool disposing) {
             this._context.Dispose();
         }
 
         #region Videojuego
 
         // GET: Admin/Producto/Videojuegos
-        public ActionResult Videojuegos (int? page, int? count) {
+        public ActionResult Videojuegos(int? page, int? count) {
 
             // Validamos el numero de la pagina
             if (!page.HasValue) {
@@ -43,26 +43,43 @@ namespace GameOfBreak.Areas.Admin.Controllers {
             // Creamos el Pager
             var pager = new Pager(count.Value, page, 15);
 
-            var videoJuegos = this._context.VideoJuego
+            var listaVideoJuegos = this._context.VideoJuego
                 .OrderByDescending(vj => vj.FechaSalida)
                 .Skip((pager.CurrentPage - 1) * 15).Take(15)
-                .Select((vj) => new VideojuegoViewModel() {
-                    UPC = vj.UPC,
-                    Videojuego = vj,
-                    Plataforma = this._context.Plataforma
-                            .Where(p => p.ID_PLATAFORMA == this._context.RelProductoPlataforma
-                                                                        .Where(relP => relP.UPC.Equals(vj.UPC))
-                                                                        .FirstOrDefault().ID_PLATAFORMA)
-                            .FirstOrDefault(),
-                    Clasificacion = this._context.Clasificacion.Where(c => c.ID_CLASIFICACION == vj.ID_CLASIFICACION).FirstOrDefault(),
-                    Desarrolladora =  this._context.Desarrolladora.Where(d => d.ID_DESARROLLADORA == vj.ID_DESARROLLADORA).FirstOrDefault(),
-                    Genero = this._context.Genero.Where(g => g.ID_GENERO == vj.ID_GENERO).FirstOrDefault()
+            //.Select((vj) => new VideojuegoViewModel() {
+            //    UPC = vj.UPC,
+            //    Videojuego = vj,
+            //    //Plataforma = this._context.Plataforma
+            //    //        .Where(p => p.ID_PLATAFORMA == this._context.RelProductoPlataforma
+            //    //                                                    .Where(relP => relP.UPC.Equals(vj.UPC))
+            //    //                                                    .FirstOrDefault().ID_PLATAFORMA)
+            //    //        .FirstOrDefault(),
+            //    Clasificacion = this._context.Clasificacion.Where(c => c.ID_CLASIFICACION == vj.ID_CLASIFICACION).FirstOrDefault(),
+            //    Desarrolladora =  this._context.Desarrolladora.Where(d => d.ID_DESARROLLADORA == vj.ID_DESARROLLADORA).FirstOrDefault(),
+            //    Genero = this._context.Genero.Where(g => g.ID_GENERO == vj.ID_GENERO).FirstOrDefault()
 
-                })
+            //})
             .ToList();
 
-            var viewModel = new PaginationViewModel<VideojuegoViewModel>
-            {
+            var ups = listaVideoJuegos.Select(lvj => lvj.UPC);
+
+            var plataformas = this._context.Plataforma.ToList();
+
+            var relPP = this._context.RelProductoPlataforma
+                                     .Where(rpp => ups.Contains(rpp.UPC))
+                                     .Select(rpp => new { rpp.ID_PLATAFORMA, rpp.UPC })
+                                     .ToList();
+
+            var videoJuegos = listaVideoJuegos.Select(vj => new VideojuegoViewModel() {
+                UPC = vj.UPC,
+                Videojuego = vj,
+                Plataforma = plataformas.Where(p => relPP.Where(rpp => rpp.UPC.Equals(vj.UPC)).FirstOrDefault().ID_PLATAFORMA == p.ID_PLATAFORMA).FirstOrDefault(),
+                Clasificacion = this._context.Clasificacion.Where(c => c.ID_CLASIFICACION == vj.ID_CLASIFICACION).FirstOrDefault(),
+                Desarrolladora = this._context.Desarrolladora.Where(d => d.ID_DESARROLLADORA == vj.ID_DESARROLLADORA).FirstOrDefault(),
+                Genero = this._context.Genero.Where(g => g.ID_GENERO == vj.ID_GENERO).FirstOrDefault()
+            }).ToList();
+
+            var viewModel = new PaginationViewModel<VideojuegoViewModel> {
                 Items = videoJuegos,
                 Pager = pager
             };
@@ -76,29 +93,41 @@ namespace GameOfBreak.Areas.Admin.Controllers {
         }
 
         [Authorize(Roles = "Administrador")]
-        public ActionResult EditarVideojuego (string upc) {
+        public ActionResult EditarVideojuego(string upc) {
 
-            var videojuego = this._context.VideoJuego
+            var plataformas = this._context.Plataforma.ToList();
+
+            var relPP = this._context.RelProductoPlataforma
+                                     .Where(rpp => rpp.UPC.Equals(upc))
+                                     .FirstOrDefault();
+
+            var plataforma = plataformas.Where(p => p.ID_PLATAFORMA == relPP.ID_PLATAFORMA).FirstOrDefault();
+
+            var videoJuego = this._context.VideoJuego
                 .Include(vj => vj.Desarrolladora)
                 .Include(vj => vj.Clasificacion)
                 .Include(vj => vj.Genero)
-                .Select((vj) => new VideojuegoViewModel
-                {
-                    UPC = vj.UPC,
-                    Videojuego = vj,
-                    Plataforma = this._context.Plataforma.Where( plat => plat.ID_PLATAFORMA ==
-                                (this._context.RelProductoPlataforma.Where(p => p.UPC.Equals(vj.UPC)).FirstOrDefault().ID_PLATAFORMA)).FirstOrDefault()
-                })
-                .Where(vj => vj.Videojuego.UPC.Equals(upc)).SingleOrDefault();
+                .Where(vj => vj.UPC.Equals(upc))
+                //.Select((vj) => new VideojuegoViewModel {
+                //    UPC = vj.UPC,
+                //    Videojuego = vj,
+                //    Plataforma = plataforma
+                //})
+                .FirstOrDefault();
+
+            var videojuego = new VideojuegoViewModel() {
+                UPC = videoJuego.UPC,
+                Videojuego = videoJuego,
+                Plataforma = plataforma
+            };
 
             if (videojuego == null) {
                 return HttpNotFound();
             }
 
-            var plataformas = this._context.Plataforma.AsEnumerable();
-            var desarrolladoras = this._context.Desarrolladora.AsEnumerable();
-            var clasificaciones = this._context.Clasificacion.AsEnumerable();
-            var generos = this._context.Genero.AsEnumerable();
+            var desarrolladoras = this._context.Desarrolladora.ToList();
+            var clasificaciones = this._context.Clasificacion.ToList();
+            var generos = this._context.Genero.ToList();
 
             videojuego.Plataformas = plataformas;
             videojuego.Desarrolladoras = desarrolladoras;
@@ -110,7 +139,7 @@ namespace GameOfBreak.Areas.Admin.Controllers {
         }
 
         [Authorize(Roles = "Administrador")]
-        public ActionResult NuevoVideojuego () {
+        public ActionResult NuevoVideojuego() {
 
             var videojuego = new VideojuegoViewModel() {
 
@@ -136,7 +165,7 @@ namespace GameOfBreak.Areas.Admin.Controllers {
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult GuardarVideojuego (VideojuegoViewModel videojuegoVM) {
+        public ActionResult GuardarVideojuego(VideojuegoViewModel videojuegoVM) {
 
             if (!ModelState.IsValid) {
 
@@ -205,7 +234,7 @@ namespace GameOfBreak.Areas.Admin.Controllers {
 
         #region Accesorio
 
-        public ActionResult Accesorios (int? page, int? count) {
+        public ActionResult Accesorios(int? page, int? count) {
 
             // Validamos el numero de la pagina
             if (!page.HasValue) {
@@ -222,22 +251,35 @@ namespace GameOfBreak.Areas.Admin.Controllers {
             // Creamos el pager
             var pager = new Pager(count.Value, page, 15);
 
-            var accesorios = this._context.Accesorio
+            var listaAccesorios = this._context.Accesorio
                 .OrderByDescending(acc => acc.FechaSalida)
                 .Skip((pager.CurrentPage - 1) * 15).Take(15)
-                .Select( acc => new AccesorioViewModel {
-                    Accesorio = acc,
-                    Plataforma = this._context.Plataforma
-                                    .Where(plat => plat.ID_PLATAFORMA == this._context.RelProductoPlataforma
-                                                                                        .Where(relP => relP.UPC.Equals(acc.UPC))
-                                                                                        .FirstOrDefault()
-                                                                          .ID_PLATAFORMA)
-                                    .FirstOrDefault()
-                })
-                .AsEnumerable();
+                //.Select( acc => new AccesorioViewModel {
+                //    Accesorio = acc,
+                //    Plataforma = this._context.Plataforma
+                //                    .Where(plat => plat.ID_PLATAFORMA == this._context.RelProductoPlataforma
+                //                                                                        .Where(relP => relP.UPC.Equals(acc.UPC))
+                //                                                                        .FirstOrDefault()
+                //                                                          .ID_PLATAFORMA)
+                //                    .FirstOrDefault()
+                //})
+                .ToList();
 
-            var viewModel = new PaginationViewModel<AccesorioViewModel>
-            {
+            var upc = listaAccesorios.Select(a => a.UPC).ToList();
+
+            var plataformas = this._context.Plataforma.ToList();
+
+            var relPP = this._context.RelProductoPlataforma
+                                     .Where(rpp => upc.Contains(rpp.UPC))
+                                     .Select(rpp => new { rpp.ID_PLATAFORMA, rpp.UPC })
+                                     .ToList();
+
+            var accesorios = listaAccesorios.Select(accesorio => new AccesorioViewModel() {
+                Accesorio = accesorio,
+                Plataforma = plataformas.Where(p => relPP.Where(rpp => rpp.UPC.Equals(accesorio.UPC)).FirstOrDefault().ID_PLATAFORMA == p.ID_PLATAFORMA).FirstOrDefault(),
+            });
+
+            var viewModel = new PaginationViewModel<AccesorioViewModel> {
                 Items = accesorios,
                 Pager = pager,
             };
@@ -251,7 +293,7 @@ namespace GameOfBreak.Areas.Admin.Controllers {
         }
 
         [Authorize(Roles = "Administrador")]
-        public ActionResult EditarAccesorio (string upc) {
+        public ActionResult EditarAccesorio(string upc) {
 
             var accesorio = this._context.Accesorio
                 .Where(acc => acc.UPC.Equals(upc))
@@ -276,7 +318,7 @@ namespace GameOfBreak.Areas.Admin.Controllers {
         }
 
         [Authorize(Roles = "Administrador")]
-        public ActionResult AgregarAccesorio () {
+        public ActionResult AgregarAccesorio() {
 
             var consola = this._context.Plataforma.FirstOrDefault();
             var plataformas = this._context.Plataforma.AsEnumerable();
@@ -293,7 +335,7 @@ namespace GameOfBreak.Areas.Admin.Controllers {
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult GuardarAccesorio (AccesorioViewModel accesorioVM) {
+        public ActionResult GuardarAccesorio(AccesorioViewModel accesorioVM) {
 
             if (!ModelState.IsValid) {
 
@@ -343,7 +385,7 @@ namespace GameOfBreak.Areas.Admin.Controllers {
 
         #endregion
 
-        public ActionResult EditarMultimedia (string upc) {
+        public ActionResult EditarMultimedia(string upc) {
 
             var producto = this._context.Productos.Where(prod => prod.UPC.Equals(upc)).FirstOrDefault();
 
@@ -364,7 +406,7 @@ namespace GameOfBreak.Areas.Admin.Controllers {
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult GuardarMultimedia (RepositorioMultimedia repositorio) {
+        public ActionResult GuardarMultimedia(RepositorioMultimedia repositorio) {
 
             if (!ModelState.IsValid) {
 
